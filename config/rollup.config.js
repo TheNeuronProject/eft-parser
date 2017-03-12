@@ -15,7 +15,7 @@ module.exports = {
 	entry: 'src/eft-parser.js',
 	devDest: 'test/eft-parser.dev.js',
 	proDest: 'dist/eft-parser.min.js',
-	format: 'iife',
+	format: 'umd',
 	sourceMap: 'inline',
 	plugins: [
 		progress({
