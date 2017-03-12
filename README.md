@@ -4,9 +4,10 @@
 Parser for [ef.js](https://github.com/ClassicOldSong/ef.js) templates
 
 ## Usage
-Node.js
+ES6
 ``` javascript
 import eftParser from 'eft-parser'
+// use `const eftParser = require('eft-parser')` for node.js
 
 const template = 'Your awsome template here'
 const ast = eftParser(template)
