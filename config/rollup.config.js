@@ -1,14 +1,10 @@
 // Rollup plugins
-const babel = require('rollup-plugin-babel')
+const buble = require('rollup-plugin-buble')
 const eslint = require('rollup-plugin-eslint')
 const resolve = require('rollup-plugin-node-resolve')
 const commonjs = require('rollup-plugin-commonjs')
-const replace = require('rollup-plugin-replace')
 const uglify = require('rollup-plugin-uglify')
 const progress = require('rollup-plugin-progress')
-const json = require('rollup-plugin-json')
-const git = require('git-rev-sync')
-const { version } = require('../package.json')
 
 module.exports = {
 	moduleName: 'eftParser',
@@ -28,14 +24,12 @@ module.exports = {
 			browser: true,
 		}),
 		commonjs(),
-		json(),
-		replace({
-			ENV: JSON.stringify(process.env.NODE_ENV || 'development'),
-			VERSION: JSON.stringify(`${version}.${git.branch()}.${git.short()}`)
-		}),
-		babel({
-			exclude: 'node_modules/**',
-			runtimeHelpers: true
+		buble({
+			transforms: {
+				modules: false,
+				dangerousForOf: true
+			},
+			objedtAssign: 'Object.assign'
 		}),
 		(process.env.NODE_ENV === 'production' && uglify())
 	]
