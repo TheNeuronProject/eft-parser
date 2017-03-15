@@ -1,6 +1,7 @@
 import ESCAPE from './escape-parser.js'
 
 const typeSymbols = '>#%@.-+'.split('')
+const reserved = 'attached data element methods subscribe unsubscribe update'.split(' ').map(i => `$${i}`)
 const fullMustache = /^\{\{.*\}\}$/
 const mustache = /\{\{.+?\}\}/g
 
@@ -57,7 +58,7 @@ const eftParser = (template) => {
 			const type = content[0]
 			content = content.slice(1)
 			if (!content && typeSymbols.indexOf(type) >= 0) throw new SyntaxError(`Empty content at line ${parseInt(i, 10) + 1}`)
-			// Jump back to parent
+			// Jump back to upper level
 			if (depth < prevDepth || (depth === prevDepth && prevType === 'tag')) currentNode = resolveDepth(ast, depth)
 			prevDepth = depth
 
@@ -101,6 +102,7 @@ const eftParser = (template) => {
 					break
 				}
 				case '-': {
+					if (reserved.indexOf(content) !== -1) throw new Error(`No reserved name '${content}' should be used. At line ${parseInt(i, 10) + 1}`)
 					prevType = 'node'
 					currentNode.push({
 						name: content,
