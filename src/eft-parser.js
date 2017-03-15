@@ -5,6 +5,8 @@ const reserved = 'attached data element methods subscribe unsubscribe update'.sp
 const fullMustache = /^\{\{.*\}\}$/
 const mustache = /\{\{.+?\}\}/g
 
+const getErrorMsg = (msg, line = -2) => `Failed to parse eft template: ${msg}. at line ${parseInt(line, 10) + 1}`
+
 const getDepth = (string) => {
 	let depth = 0
 	const content = string = string.replace(/^\t+/, (str) => {
@@ -44,9 +46,13 @@ const parseText = (string) => {
 }
 
 const eftParser = (template) => {
-	const lines = template.split(/[\r\n]/)
+	if (!template) throw new TypeError(getErrorMsg('Template required, but nothing present'))
+		const tplType = Object.prototype.toString.call(template)
+	if (tplType !== '[object String]') throw new TypeError(getErrorMsg(`Expected a string, but got an ${tplType}`))
+	const lines = template.split(/\r?\n/)
 	const ast = []
 	let prevDepth = 0
+	let minDepth = 0
 	let prevType = 'comment'
 	let currentNode = ast
 	let topExists = false
@@ -54,17 +60,21 @@ const eftParser = (template) => {
 		let { depth, content } = getDepth(lines[i])
 
 		if (content) {
-			if (depth < 0 || depth - prevDepth > 1 || (depth - prevDepth === 1 && ['comment', 'tag'].indexOf(prevType) === -1) || (depth === 0 && topExists)) throw new SyntaxError(`Bad indent at line ${parseInt(i, 10) + 1}`)
+			if (depth < minDepth || depth - prevDepth > 1 || (depth - prevDepth === 1 && ['comment', 'tag'].indexOf(prevType) === -1) || (depth === minDepth && topExists)) throw new SyntaxError(getErrorMsg(`Indent grater than ${minDepth - 1} and less than ${prevDepth + 2} expected, but got ${depth}`, i))
 			const type = content[0]
 			content = content.slice(1)
-			if (!content && typeSymbols.indexOf(type) >= 0) throw new SyntaxError(`Empty content at line ${parseInt(i, 10) + 1}`)
+			if (!topExists && typeSymbols.indexOf(type) >= 0 && type !== '>') throw new SyntaxError(getErrorMsg('No top level entry', i))
+			if (!content && typeSymbols.indexOf(type) >= 0) throw new SyntaxError(getErrorMsg('Empty content', i))
 			// Jump back to upper level
 			if (depth < prevDepth || (depth === prevDepth && prevType === 'tag')) currentNode = resolveDepth(ast, depth)
 			prevDepth = depth
 
 			switch (type) {
 				case '>': {
-					topExists = true
+					if (!topExists) {
+						topExists = true
+						minDepth = depth
+					}
 					prevType = 'tag'
 					const newNode = [{
 						tag: content,
@@ -91,7 +101,7 @@ const eftParser = (template) => {
 				case '@': {
 					prevType = 'event'
 					const { name, value } = parseNodeProps(content)
-					if (typeof value !== 'string') throw new SyntaxError(`Methods should not be wrapped in mustaches. At line ${parseInt(i, 10) + 1}`)
+					if (typeof value !== 'string') throw new SyntaxError(getErrorMsg('Methods should not be wrapped in mustaches', i))
 					currentNode[0].event[name] = value
 					break
 				}
@@ -102,7 +112,7 @@ const eftParser = (template) => {
 					break
 				}
 				case '-': {
-					if (reserved.indexOf(content) !== -1) throw new Error(`No reserved name '${content}' should be used. At line ${parseInt(i, 10) + 1}`)
+					if (reserved.indexOf(content) !== -1) throw new SyntaxError(getErrorMsg(`No reserved name '${content}' should be used`, i))
 					prevType = 'node'
 					currentNode.push({
 						name: content,
@@ -126,7 +136,7 @@ const eftParser = (template) => {
 	}
 
 	if (ast[0]) return ast[0]
-	throw new Error('Nothing to be parsed.')
+	throw new SyntaxError(getErrorMsg('Nothing to be parsed', lines.length - 1))
 }
 
 export default eftParser
