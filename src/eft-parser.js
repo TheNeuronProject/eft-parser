@@ -60,7 +60,7 @@ const eftParser = (template) => {
 		let { depth, content } = getDepth(lines[i])
 
 		if (content) {
-			if (depth < minDepth || depth - prevDepth > 1 || (depth - prevDepth === 1 && ['comment', 'tag'].indexOf(prevType) === -1) || (depth === minDepth && topExists)) throw new SyntaxError(getErrorMsg(`Indent grater than ${minDepth - 1} and less than ${prevDepth + 2} expected, but got ${depth}`, i))
+			if (depth < minDepth || depth - prevDepth > 1 || (depth - prevDepth === 1 && ['comment', 'tag'].indexOf(prevType) === -1) || (prevType !== 'comment' && depth === minDepth && topExists)) throw new SyntaxError(getErrorMsg(`Indent grater than ${minDepth - 1} and less than ${prevDepth + 2} expected, but got ${depth}`, i))
 			const type = content[0]
 			content = content.slice(1)
 			if (!topExists && typeSymbols.indexOf(type) >= 0 && type !== '>') throw new SyntaxError(getErrorMsg('No top level entry', i))
