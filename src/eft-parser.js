@@ -1,7 +1,7 @@
 import ESCAPE from './escape-parser.js'
 
 const typeSymbols = '>#%@.-+'.split('')
-const reserved = 'attached data element methods subscribe unsubscribe update'.split(' ').map(i => `$${i}`)
+const reserved = 'attached data element nodes methods subscribe unsubscribe update'.split(' ').map(i => `$${i}`)
 const fullMustache = /^\{\{.*\}\}$/
 const mustache = /\{\{.+?\}\}/g
 
@@ -22,11 +22,30 @@ const resolveDepth = (ast, depth) => {
 	return currentNode
 }
 
+const parseTag = (string) => {
+	const [content, ...alias] = string.split('#')
+	const [tag, ...classes] = content.split('.')
+	return {
+		tag,
+		alias: alias.join('#'),
+		class: classes.join(' ')
+	}
+}
+
+const splitDefault = (string) => {
+	string = string.substr(2, string.length - 4)
+	const [_path, ..._default] = string.split('=')
+	const pathArr = _path.trim().split('.')
+	const defaultVal = ESCAPE(_default.join('=').trim())
+	if (defaultVal) pathArr.push([defaultVal])
+	return pathArr
+}
+
 const parseNodeProps = (string) => {
 	const splited = string.split('=')
 	const name = splited.shift().trim()
-	let value = splited.join('=').trim()
-	if (fullMustache.test(value)) return { name, value: value.substr(2, value.length - 4).split('.') }
+	const value = splited.join('=').trim()
+	if (fullMustache.test(value)) return { name, value: splitDefault(value) }
 	return { name, value }
 }
 
@@ -37,9 +56,7 @@ const parseText = (string) => {
 		const texts = string.split(mustache)
 		for (let i = 0; i < texts.length; i++) {
 			if (texts[i]) parts.push(ESCAPE(texts[i]))
-			if (mustaches[i]) parts.push(mustaches[i].substr(2, mustaches[i].length - 4)
-				.trim()
-				.split('.'))
+			if (mustaches[i]) parts.push(splitDefault(mustaches[i]))
 		}
 	} else parts.push(string)
 	return parts
@@ -76,12 +93,15 @@ const eftParser = (template) => {
 						minDepth = depth
 					}
 					prevType = 'tag'
+					const info = parseTag(content)
 					const newNode = [{
-						tag: content,
+						tag: info.tag,
 						attr: {},
 						prop: {},
 						event: {}
 					}]
+					if (info.class) newNode[0].attr.class = info.class
+					if (info.alias) newNode[0].alias = info.alias
 					currentNode.push(newNode)
 					currentNode = newNode
 					break

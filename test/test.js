@@ -91,34 +91,29 @@ var ast = [
 ]
 
 var template = 'this is a comment\n' +
-'>div\n' +
-'	#class = {{class}}\n' +
+'>div.box.test#root\n' +
 '	#style = {{attr.style}}\n' +
 '	#id = testdiv\n' +
 '	#some-attr = some text\n' +
 '	#content =\n' +
 '	%title = {{name}}\n' +
 '	%anotherProperty = text\n' +
-'	%contentEditable = {{edit}}\n' +
-'	.Name: {{name}}&nJob: {{job}}\n' +
+'	.Name: {{name = some name}}&nJob: {{job = some job}}\n' +
 '	>br\n' +
 '	-node1\n' +
-'	>p\n' +
+'	>p#info\n' +
 '		#class = some class name\n' +
 '		@click = alertNotice\n' +
 '		/@mousedown = setState\n' +
 '		>span\n' +
-'			.Notice: {{notice}}\n' +
+'			.Notice: {{notice = N/A}}\n' +
 '		. test\n' +
 '	 	-node2\n' +
 '		+list1'
 
 var data1 = {
 	$data: {
-			class: 'box test class',
-			name: 'Bob',
 			job: 'Assit Alice',
-			notice: 'ooooooops'
 	},
 	$methods: {
 		alertNotice(state) {
@@ -145,10 +140,8 @@ state4.$data.text = 'box'
 
 // state.$data.root.text = 'component 1'
 state2.$data.root.text = 'component 2'
-state3.$data.class = 'box'
 state3.$data.name = 'Alice'
 state3.$data.job = 'Developer'
-state3.$data.notice = 'N/A'
 state4.$data.job = 'Assiting Alice'
 
 var data2 = {
