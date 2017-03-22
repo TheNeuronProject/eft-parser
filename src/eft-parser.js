@@ -46,7 +46,7 @@ const parseNodeProps = (string) => {
 	const name = splited.shift().trim()
 	const value = splited.join('=').trim()
 	if (fullMustache.test(value)) return { name, value: splitDefault(value) }
-	return { name, value }
+	return { name, value: ESCAPE(value) }
 }
 
 const parseText = (string) => {
