@@ -95,12 +95,12 @@ const eftParser = (template) => {
 					prevType = 'tag'
 					const info = parseTag(content)
 					const newNode = [{
-						tag: info.tag,
-						attr: {},
-						prop: {},
-						event: {}
+						tag: info.tag
 					}]
-					if (info.class) newNode[0].attr.class = info.class
+					if (info.class) {
+						newNode[0].attr = {}
+						newNode[0].attr.class = info.class
+					}
 					if (info.alias) newNode[0].alias = info.alias
 					currentNode.push(newNode)
 					currentNode = newNode
@@ -109,12 +109,14 @@ const eftParser = (template) => {
 				case '#': {
 					prevType = 'attr'
 					const { name, value } = parseNodeProps(content)
+					if (!currentNode[0].attr) currentNode[0].attr = {}
 					currentNode[0].attr[name] = value
 					break
 				}
 				case '%': {
 					prevType = 'prop'
 					const { name, value } = parseNodeProps(content)
+					if (!currentNode[0].prop) currentNode[0].prop = {}
 					currentNode[0].prop[name] = value
 					break
 				}
@@ -122,6 +124,7 @@ const eftParser = (template) => {
 					prevType = 'event'
 					const { name, value } = parseNodeProps(content)
 					if (typeof value !== 'string') throw new SyntaxError(getErrorMsg('Methods should not be wrapped in mustaches', i))
+					if (!currentNode[0].event) currentNode[0].event = {}
 					currentNode[0].event[name] = value
 					break
 				}
