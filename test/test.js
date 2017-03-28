@@ -91,7 +91,7 @@ var ast = [
 ]
 
 var template = 'this is a comment\n' +
-'>div.box.test#root\n' +
+'>div.{{box.test = 23232}}#root\n' +
 '	#style = {{attr.style}}\n' +
 '	#id = testdiv\n' +
 '	#some-attr = some text\n' +
@@ -101,8 +101,7 @@ var template = 'this is a comment\n' +
 '	.Name: {{name = some name}}&nJob: {{job = some job}}\n' +
 '	>br\n' +
 '	-node1\n' +
-'	>p#info\n' +
-'		#class = some class name\n' +
+'	>p.some.class.name#info\n' +
 '		@click = alertNotice\n' +
 '		/@mousedown = setState\n' +
 '		>span\n' +
@@ -122,8 +121,10 @@ var data1 = {
 	}
 }
 
+var ast2 = eftParser(template)
+
 var module1 = new ef(ast)
-var module2 = new ef(eftParser(template))
+var module2 = new ef(ast2)
 
 var state = module1.render()
 var state2 = module1.render()

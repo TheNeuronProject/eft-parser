@@ -22,16 +22,6 @@ const resolveDepth = (ast, depth) => {
 	return currentNode
 }
 
-const parseTag = (string) => {
-	const [content, ...alias] = string.split('#')
-	const [tag, ...classes] = content.split('.')
-	return {
-		tag,
-		alias: alias.join('#'),
-		class: classes.join(' ')
-	}
-}
-
 const splitDefault = (string) => {
 	string = string.substr(2, string.length - 4)
 	const [_path, ..._default] = string.split('=')
@@ -39,6 +29,22 @@ const splitDefault = (string) => {
 	const defaultVal = ESCAPE(_default.join('=').trim())
 	if (defaultVal) pathArr.push([defaultVal])
 	return pathArr
+}
+
+const parseTag = (string) => {
+	const [content, ...alias] = string.split('#')
+	const [tag, ...classes] = content.split('.')
+	const classValue = classes.join('.')
+	if (fullMustache.test(classValue)) return {
+		tag,
+		alias: alias.join('#'),
+		class: splitDefault(classValue)
+	}
+	return {
+		tag,
+		alias: alias.join('#'),
+		class: classes.join(' ')
+	}
 }
 
 const parseNodeProps = (string) => {
