@@ -27,8 +27,8 @@ const splitDefault = (string) => {
 	const [_path, ..._default] = string.split('=')
 	const pathArr = _path.trim().split('.')
 	const defaultVal = ESCAPE(_default.join('=').trim())
-	if (defaultVal) pathArr.push([defaultVal])
-	return pathArr
+	if (defaultVal) return [pathArr, defaultVal]
+	return [pathArr]
 }
 
 const parseTag = (string) => {
@@ -66,6 +66,12 @@ const parseText = (string) => {
 		}
 	} else parts.push(string)
 	return parts
+}
+
+const splitEvents = (string) => {
+	const [name, ...value] = string.split(':')
+	if (value.length > 0) return [name.trim(), ESCAPE(value.join(':'))]
+	return [name.trim()]
 }
 
 const eftParser = (template) => {
@@ -131,7 +137,7 @@ const eftParser = (template) => {
 					const { name, value } = parseNodeProps(content)
 					if (typeof value !== 'string') throw new SyntaxError(getErrorMsg('Methods should not be wrapped in mustaches', i))
 					if (!currentNode[0].event) currentNode[0].event = {}
-					currentNode[0].event[name] = value
+					currentNode[0].event[name] = splitEvents(value)
 					break
 				}
 				case '.': {
@@ -141,7 +147,7 @@ const eftParser = (template) => {
 					break
 				}
 				case '-': {
-					if (reserved.indexOf(content) !== -1) throw new SyntaxError(getErrorMsg(`No reserved name '${content}' should be used`, i))
+					if (reserved.indexOf(content) !== -1) throw new SyntaxError(getErrorMsg(`Reserved name '${content}' should not be used`, i))
 					prevType = 'node'
 					currentNode.push({
 						name: content,
