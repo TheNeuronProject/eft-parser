@@ -1,7 +1,7 @@
 import ESCAPE from './escape-parser.js'
 
 const typeSymbols = '>#%@.-+'.split('')
-const reserved = 'attached data element nodes methods subscribe unsubscribe update'.split(' ').map(i => `$${i}`)
+const reserved = 'attached data element nodes methods subscribe unsubscribe update destroy'.split(' ').map(i => `$${i}`)
 const fullMustache = /^\{\{.*\}\}$/
 const mustache = /\{\{.+?\}\}/g
 
