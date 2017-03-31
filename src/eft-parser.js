@@ -70,7 +70,11 @@ const parseText = (string) => {
 
 const splitEvents = (string) => {
 	const [name, ...value] = string.split(':')
-	if (value.length > 0) return [name.trim(), ESCAPE(value.join(':'))]
+	const content = value.join(':')
+	if (content) {
+		if (fullMustache.test(content)) return [name.trim(), splitDefault(content)]
+		return [name.trim(), ESCAPE(value.join(':'))]
+	}
 	return [name.trim()]
 }
 

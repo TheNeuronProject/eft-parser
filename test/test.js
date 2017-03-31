@@ -104,7 +104,7 @@ var template = 'this is a comment\n' +
 '	-node1\n' +
 '	>p\n' +
 '		#class = some class name\n' +
-'		@click = alertNotice:    test value\n' +
+'		@click = alertNotice:{{attr.style = color: #666}}\n' +
 '		/@mousedown = setState\n' +
 '		>span\n' +
 '			.Notice: {{notice}}\n' +
