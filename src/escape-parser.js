@@ -52,4 +52,5 @@ const ESCAPE = (string) => {
 	return escaped.join(char)
 }
 
-export default ESCAPE
+// export default ESCAPE
+module.exports = ESCAPE

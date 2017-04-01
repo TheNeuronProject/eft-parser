@@ -64,7 +64,7 @@ const parseText = (string) => {
 			if (texts[i]) parts.push(ESCAPE(texts[i]))
 			if (mustaches[i]) parts.push(splitDefault(mustaches[i]))
 		}
-	} else parts.push(string)
+	} else parts.push(ESCAPE(string))
 	return parts
 }
 
