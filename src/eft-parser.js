@@ -32,17 +32,17 @@ const splitDefault = (string) => {
 }
 
 const parseTag = (string) => {
-	const [content, ...alias] = string.split('#')
+	const [content, ...name] = string.split('#')
 	const [tag, ...classes] = content.split('.')
 	const classValue = classes.join('.')
 	if (fullMustache.test(classValue)) return {
 		tag,
-		alias: alias.join('#'),
+		name: name.join('#'),
 		class: splitDefault(classValue)
 	}
 	return {
 		tag,
-		alias: alias.join('#'),
+		name: name.join('#'),
 		class: classes.join(' ')
 	}
 }
@@ -93,7 +93,7 @@ const eftParser = (template) => {
 		let { depth, content } = getDepth(lines[i])
 
 		if (content) {
-			if (depth < minDepth || depth - prevDepth > 1 || (depth - prevDepth === 1 && ['comment', 'tag'].indexOf(prevType) === -1) || (prevType !== 'comment' && depth === minDepth && topExists)) throw new SyntaxError(getErrorMsg(`Indent grater than ${minDepth - 1} and less than ${prevDepth + 2} expected, but got ${depth}`, i))
+			if (depth < minDepth || depth - prevDepth > 1 || (depth - prevDepth === 1 && ['comment', 'tag'].indexOf(prevType) === -1) || (prevType !== 'comment' && depth === minDepth && topExists)) throw new SyntaxError(getErrorMsg(`Expected indent to be grater than ${minDepth - 1} and less than ${prevDepth + 2}, but got ${depth}`, i))
 			const type = content[0]
 			content = content.slice(1)
 			if (!topExists && typeSymbols.indexOf(type) >= 0 && type !== '>') throw new SyntaxError(getErrorMsg('No top level entry', i))
@@ -111,13 +111,13 @@ const eftParser = (template) => {
 					prevType = 'tag'
 					const info = parseTag(content)
 					const newNode = [{
-						tag: info.tag
+						t: info.tag
 					}]
 					if (info.class) {
-						newNode[0].attr = {}
-						newNode[0].attr.class = info.class
+						newNode[0].a = {}
+						newNode[0].a.class = info.class
 					}
-					if (info.alias) newNode[0].alias = info.alias
+					if (info.name) newNode[0].n = info.name
 					currentNode.push(newNode)
 					currentNode = newNode
 					break
@@ -125,23 +125,23 @@ const eftParser = (template) => {
 				case '#': {
 					prevType = 'attr'
 					const { name, value } = parseNodeProps(content)
-					if (!currentNode[0].attr) currentNode[0].attr = {}
-					currentNode[0].attr[name] = value
+					if (!currentNode[0].a) currentNode[0].a = {}
+					currentNode[0].a[name] = value
 					break
 				}
 				case '%': {
 					prevType = 'prop'
 					const { name, value } = parseNodeProps(content)
-					if (!currentNode[0].prop) currentNode[0].prop = {}
-					currentNode[0].prop[name] = value
+					if (!currentNode[0].p) currentNode[0].p = {}
+					currentNode[0].p[name] = value
 					break
 				}
 				case '@': {
 					prevType = 'event'
 					const { name, value } = parseNodeProps(content)
 					if (typeof value !== 'string') throw new SyntaxError(getErrorMsg('Methods should not be wrapped in mustaches', i))
-					if (!currentNode[0].event) currentNode[0].event = {}
-					currentNode[0].event[name] = splitEvents(value)
+					if (!currentNode[0].e) currentNode[0].e = {}
+					currentNode[0].e[name] = splitEvents(value)
 					break
 				}
 				case '.': {
@@ -154,16 +154,16 @@ const eftParser = (template) => {
 					if (reserved.indexOf(content) !== -1) throw new SyntaxError(getErrorMsg(`Reserved name '${content}' should not be used`, i))
 					prevType = 'node'
 					currentNode.push({
-						name: content,
-						type: 'node'
+						n: content,
+						t: 0
 					})
 					break
 				}
 				case '+': {
 					prevType = 'list'
 					currentNode.push({
-						name: content,
-						type: 'list'
+						n: content,
+						t: 1
 					})
 					break
 				}
