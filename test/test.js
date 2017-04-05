@@ -91,26 +91,26 @@ var ast = [
 	{ n: 'list', t: 1 }
 ]
 
-var template = 'this is a comment\n' +
-'>div.{{class = some class name}}\n' +
-'	#style = {{attr.style}}\n' +
-'	#id = testdiv\n' +
-'	#some-attr = some text\n' +
-'	#content =\n' +
-'	%title = {{name}}\n' +
-'	%anotherProperty = text\n' +
-'	.Name: {{name}}&nJob: {{job}}\n' +
-'	>br\n' +
-'	-node1\n' +
-'	>p\n' +
-'		#class = some class name\n' +
-'		@click = alertNotice:{{attr.style = color: #666}}\n' +
-'		/@mousedown = setState\n' +
-'		>span\n' +
-'			.Notice: {{notice}}\n' +
-'		. test\n' +
-'	 	-node2\n' +
-'		+list1'
+var template = '  this is a comment\n' +
+'  >div.{{class = some class name}}\n' +
+'    #style = {{attr.style}}\n' +
+'    #id = testdiv\n' +
+'  	#some-attr = some text\n' +
+'  	#content =\n' +
+'  	%title = {{name}}\n' +
+'  	%anotherProperty = text\n' +
+'  	.Name: {{name}}&nJob: {{job}}\n' +
+'  	>br\n' +
+'  	-node1\n' +
+'  	>p\n' +
+'  		#class = some class name\n' +
+'  		@click = alertNotice:{{attr.style = color: #666}}\n' +
+'  		/@mousedown = setState\n' +
+'  		>span\n' +
+'  	  	.Notice: {{notice}}\n' +
+'  		. test\n' +
+'  		-node2\n' +
+'  		+list1'
 
 var ast2 = eftParser(template)
 

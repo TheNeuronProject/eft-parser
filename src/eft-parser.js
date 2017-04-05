@@ -4,15 +4,46 @@ const typeSymbols = '>#%@.-+'.split('')
 const reserved = 'attached data element nodes methods subscribe unsubscribe update destroy'.split(' ').map(i => `$${i}`)
 const fullMustache = /^\{\{.*\}\}$/
 const mustache = /\{\{.+?\}\}/g
+const spaceIndent = /^(\t*)( *).*/
 
-const getErrorMsg = (msg, line = -2) => `Failed to parse eft template: ${msg}. at line ${parseInt(line, 10) + 1}`
+const getErrorMsg = (msg, line = -2) => `Failed to parse eft template: ${msg}. at line ${line + 1}`
 
-const getDepth = (string) => {
+const isEmpty = string => !string.replace(/\s/, '')
+
+const getOffset = (string, parsingInfo) => {
+	if (parsingInfo.offset !== null) return
+	parsingInfo.offset = string.match(/\s*/)[0]
+	if (parsingInfo.offset) parsingInfo.offsetReg = new RegExp(`^${parsingInfo.offset}`)
+}
+
+const removeOffset = (string, parsingInfo, i) => {
+	if (parsingInfo.offsetReg) {
+		let removed = false
+		string = string.replace(parsingInfo.offsetReg, () => {
+			removed = true
+			return ''
+		})
+		if (!removed) throw new SyntaxError(getErrorMsg(`Expected indent to be grater than 0 and less than ${parsingInfo.prevDepth + 1}, but got -1`, i))
+	}
+	return string
+}
+
+const getIndent = (string, parsingInfo) => {
+	if (parsingInfo.indentReg) return
+	const spaces = string.match(spaceIndent)[2]
+	if (spaces) {
+		parsingInfo.indentReg = new RegExp(spaces)
+	}
+}
+
+const getDepth = (string, parsingInfo, i) => {
 	let depth = 0
-	const content = string = string.replace(/^\t+/, (str) => {
+	if (parsingInfo.indentReg) string = string.replace(/^\s*/, str => str.replace(parsingInfo.indentReg, '\t'))
+	const content = string.replace(/^\t*/, (str) => {
 		depth = str.length
 		return ''
 	})
+	if (/^\s/.test(content)) throw new SyntaxError(getErrorMsg('Bad indent', i))
 	return { depth, content }
 }
 
@@ -78,101 +109,110 @@ const splitEvents = (string) => {
 	return [name.trim()]
 }
 
-const eftParser = (template) => {
-	if (!template) throw new TypeError(getErrorMsg('Template required, but nothing present'))
-		const tplType = Object.prototype.toString.call(template)
-	if (tplType !== '[object String]') throw new TypeError(getErrorMsg(`Expected a string, but got an ${tplType}`))
-	const lines = template.split(/\r?\n/)
-	const ast = []
-	let prevDepth = 0
-	let minDepth = 0
-	let prevType = 'comment'
-	let currentNode = ast
-	let topExists = false
-	for (let i in lines) {
-		let { depth, content } = getDepth(lines[i])
+const parseLine = ({line, ast, parsingInfo, i}) => {
+	if (isEmpty(line)) return
+	getIndent(line, parsingInfo)
+	getOffset(line, parsingInfo)
 
-		if (content) {
-			if (depth < minDepth || depth - prevDepth > 1 || (depth - prevDepth === 1 && ['comment', 'tag'].indexOf(prevType) === -1) || (prevType !== 'comment' && depth === minDepth && topExists)) throw new SyntaxError(getErrorMsg(`Expected indent to be grater than ${minDepth - 1} and less than ${prevDepth + 2}, but got ${depth}`, i))
-			const type = content[0]
-			content = content.slice(1)
-			if (!topExists && typeSymbols.indexOf(type) >= 0 && type !== '>') throw new SyntaxError(getErrorMsg('No top level entry', i))
-			if (!content && typeSymbols.indexOf(type) >= 0) throw new SyntaxError(getErrorMsg('Empty content', i))
-			// Jump back to upper level
-			if (depth < prevDepth || (depth === prevDepth && prevType === 'tag')) currentNode = resolveDepth(ast, depth)
-			prevDepth = depth
+	let { depth, content } = getDepth(removeOffset(line, parsingInfo, i), parsingInfo, i)
 
-			switch (type) {
-				case '>': {
-					if (!topExists) {
-						topExists = true
-						minDepth = depth
-					}
-					prevType = 'tag'
-					const info = parseTag(content)
-					const newNode = [{
-						t: info.tag
-					}]
-					if (info.class) {
-						newNode[0].a = {}
-						newNode[0].a.class = info.class
-					}
-					if (info.name) newNode[0].n = info.name
-					currentNode.push(newNode)
-					currentNode = newNode
-					break
+	if (content) {
+		if (depth < 0 || depth - parsingInfo.prevDepth > 1 || (depth - parsingInfo.prevDepth === 1 && ['comment', 'tag'].indexOf(parsingInfo.prevType) === -1) || (parsingInfo.prevType !== 'comment' && depth === 0 && parsingInfo.topExists)) throw new SyntaxError(getErrorMsg(`Expected indent to be grater than 0 and less than ${parsingInfo.prevDepth + 1}, but got ${depth}`, i))
+		const type = content[0]
+		content = content.slice(1)
+		if (!parsingInfo.topExists && typeSymbols.indexOf(type) >= 0 && type !== '>') throw new SyntaxError(getErrorMsg('No top level entry', i))
+		if (!content && typeSymbols.indexOf(type) >= 0) throw new SyntaxError(getErrorMsg('Empty content', i))
+		// Jump back to upper level
+		if (depth < parsingInfo.prevDepth || (depth === parsingInfo.prevDepth && parsingInfo.prevType === 'tag')) parsingInfo.currentNode = resolveDepth(ast, depth)
+		parsingInfo.prevDepth = depth
+
+		switch (type) {
+			case '>': {
+				if (!parsingInfo.topExists) {
+					parsingInfo.topExists = true
+					parsingInfo.minDepth = depth
 				}
-				case '#': {
-					prevType = 'attr'
-					const { name, value } = parseNodeProps(content)
-					if (!currentNode[0].a) currentNode[0].a = {}
-					currentNode[0].a[name] = value
-					break
+				const info = parseTag(content)
+				const newNode = [{
+					t: info.tag
+				}]
+				if (info.class) {
+					newNode[0].a = {}
+					newNode[0].a.class = info.class
 				}
-				case '%': {
-					prevType = 'prop'
-					const { name, value } = parseNodeProps(content)
-					if (!currentNode[0].p) currentNode[0].p = {}
-					currentNode[0].p[name] = value
-					break
-				}
-				case '@': {
-					prevType = 'event'
-					const { name, value } = parseNodeProps(content)
-					if (typeof value !== 'string') throw new SyntaxError(getErrorMsg('Methods should not be wrapped in mustaches', i))
-					if (!currentNode[0].e) currentNode[0].e = {}
-					currentNode[0].e[name] = splitEvents(value)
-					break
-				}
-				case '.': {
-					prevType = 'text'
-					const parts = parseText(content)
-					currentNode.push(...parts)
-					break
-				}
-				case '-': {
-					if (reserved.indexOf(content) !== -1) throw new SyntaxError(getErrorMsg(`Reserved name '${content}' should not be used`, i))
-					prevType = 'node'
-					currentNode.push({
-						n: content,
-						t: 0
-					})
-					break
-				}
-				case '+': {
-					prevType = 'list'
-					currentNode.push({
-						n: content,
-						t: 1
-					})
-					break
-				}
-				default: {
-					prevType = 'comment'
-				}
+				if (info.name) newNode[0].n = info.name
+				parsingInfo.currentNode.push(newNode)
+				parsingInfo.currentNode = newNode
+				parsingInfo.prevType = 'tag'
+				break
+			}
+			case '#': {
+				const { name, value } = parseNodeProps(content)
+				if (!parsingInfo.currentNode[0].a) parsingInfo.currentNode[0].a = {}
+				parsingInfo.currentNode[0].a[name] = value
+				parsingInfo.prevType = 'attr'
+				break
+			}
+			case '%': {
+				const { name, value } = parseNodeProps(content)
+				if (!parsingInfo.currentNode[0].p) parsingInfo.currentNode[0].p = {}
+				parsingInfo.currentNode[0].p[name] = value
+				parsingInfo.prevType = 'prop'
+				break
+			}
+			case '@': {
+				const { name, value } = parseNodeProps(content)
+				if (typeof value !== 'string') throw new SyntaxError(getErrorMsg('Methods should not be wrapped in mustaches', i))
+				if (!parsingInfo.currentNode[0].e) parsingInfo.currentNode[0].e = {}
+				parsingInfo.currentNode[0].e[name] = splitEvents(value)
+				parsingInfo.prevType = 'event'
+				break
+			}
+			case '.': {
+				parsingInfo.currentNode.push(...parseText(content))
+				parsingInfo.prevType = 'text'
+				break
+			}
+			case '-': {
+				if (reserved.indexOf(content) !== -1) throw new SyntaxError(getErrorMsg(`Reserved name '${content}' should not be used`, i))
+				parsingInfo.currentNode.push({
+					n: content,
+					t: 0
+				})
+				parsingInfo.prevType = 'node'
+				break
+			}
+			case '+': {
+				parsingInfo.currentNode.push({
+					n: content,
+					t: 1
+				})
+				parsingInfo.prevType = 'list'
+				break
+			}
+			default: {
+				parsingInfo.prevType = 'comment'
 			}
 		}
 	}
+}
+
+const eftParser = (template) => {
+	if (!template) throw new TypeError(getErrorMsg('Template required, but nothing present'))
+	const tplType = typeof template
+	if (tplType !== 'string') throw new TypeError(getErrorMsg(`Expected a string, but got a(n) ${tplType}`))
+	const lines = template.split(/\r?\n/)
+	const ast = []
+	const parsingInfo = {
+		indentReg: null,
+		prevDepth: 0,
+		offset: null,
+		offsetReg: null,
+		prevType: 'comment',
+		currentNode: ast,
+		topExists: false,
+	}
+	for (let i = 0; i < lines.length; i++) parseLine({line: lines[i], ast, parsingInfo, i})
 
 	if (ast[0]) return ast[0]
 	throw new SyntaxError(getErrorMsg('Nothing to be parsed', lines.length - 1))
