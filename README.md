@@ -9,7 +9,7 @@ ES6
 import eftParser from 'eft-parser'
 // use `const eftParser = require('eft-parser')` for node.js
 
-const template = 'Your awsome template here'
+const template = 'Your awesome template here'
 const ast = eftParser(template)
 ```
 
@@ -17,7 +17,7 @@ Browser
 ``` javascript
 <script src="dist/eft-parser.js"></script>
 <script>
-	var template = 'Your awsome template here'
+	var template = 'Your awesome template here'
 	var ast = eftParser(template)
 </script>
 ```
