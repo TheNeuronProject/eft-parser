@@ -107,7 +107,7 @@ var template = '  this is a comment\n' +
 '  		@click = alertNotice:{{attr.style = color: #666}}\n' +
 '  		/@mousedown = setState\n' +
 '  		>span\n' +
-'  	  	.Notice: {{notice}}\n' +
+'  	  	.Notice: {{notice = &u[2F804]]]}}\n' +
 '  		. test\n' +
 '  		-node2\n' +
 '  		+list1'
@@ -150,7 +150,6 @@ state2.$data.root.text = 'component 2'
 state3.$data.class = 'box'
 state3.$data.name = 'Alice'
 state3.$data.job = 'Developer'
-state3.$data.notice = 'N/A'
 state4.$data.job = 'Assisting Alice'
 
 var data2 = {
