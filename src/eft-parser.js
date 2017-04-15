@@ -5,6 +5,9 @@ const reserved = 'attached data element nodes methods subscribe unsubscribe upda
 const fullMustache = /^\{\{.*\}\}$/
 const mustache = /\{\{.+?\}\}/g
 const spaceIndent = /^(\t*)( *).*/
+const stopExp = /\.stop(?=\.|$)/g
+const stopImmediateExp = /\.stopImmediate(\.|$)/g
+const preventExp = /\.prevent(\.|$)/g
 
 const getErrorMsg = (msg, line = -2) => `Failed to parse eft template: ${msg}. at line ${line + 1}`
 
@@ -99,6 +102,25 @@ const parseText = (string) => {
 	return parts
 }
 
+const getEventOptions = (name) => {
+	let stop = false
+	let stopImmediate = false
+	let prevent = false
+	const listener = name.replace(stopExp, () => {
+		stop = true
+		return ''
+	})
+	.replace(stopImmediateExp, () => {
+		stopImmediate = true
+		return ''
+	})
+	.replace(preventExp, () => {
+		prevent = true
+		return ''
+	})
+	return { listener, stop, stopImmediate, prevent }
+}
+
 const splitEvents = (string) => {
 	const [name, ...value] = string.split(':')
 	const content = value.join(':')
@@ -164,7 +186,14 @@ const parseLine = ({line, ast, parsingInfo, i}) => {
 				const { name, value } = parseNodeProps(content)
 				if (typeof value !== 'string') throw new SyntaxError(getErrorMsg('Methods should not be wrapped in mustaches', i))
 				if (!parsingInfo.currentNode[0].e) parsingInfo.currentNode[0].e = {}
-				parsingInfo.currentNode[0].e[name] = splitEvents(value)
+				const { listener, stop, stopImmediate, prevent } = getEventOptions(name)
+				const [method, _value] = splitEvents(value)
+				const event = { m: method }
+				if (stop) event.s = 1
+				if (stopImmediate) event.i = 1
+				if (prevent) event.p = 1
+				if (_value) event.v = _value
+				parsingInfo.currentNode[0].e[listener] = event
 				parsingInfo.prevType = 'event'
 				break
 			}

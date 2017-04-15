@@ -68,6 +68,10 @@ var ast = [
 				t: 'textarea',
 				p: {
 					value: [['style'], 'background-color: #ECECEC']
+				},
+				e: {
+					'keydown.13.27': { m: 'key' },
+					'keydown.13.32': { m: 'space' }
 				}
 			}
 		],
@@ -83,7 +87,7 @@ var ast = [
 		{
 			t: 'button',
 			e: {
-				click: ['sendMsg', 'some data']
+				click: { m: 'sendMsg', v: 'some data' }
 			}
 		},
 		'sendMsg'
@@ -104,7 +108,7 @@ var template = '  this is a comment\n' +
 '  	-node1\n' +
 '  	>p\n' +
 '  		#class = some class name\n' +
-'  		@click = alertNotice:{{attr.style = color: #666}}\n' +
+'  		@click.stop = alertNotice:{{attr.style = color: #666}}\n' +
 '  		/@mousedown = setState\n' +
 '  		>span\n' +
 '  	  	.Notice: {{notice = &u[2F804]]]}}\n' +
