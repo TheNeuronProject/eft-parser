@@ -69,10 +69,10 @@ var ast = [
 				p: {
 					value: [['style'], 'background-color: #ECECEC']
 				},
-				e: {
-					'keydown.13.27': { m: 'key' },
-					'keydown.13.32': { m: 'space' }
-				}
+				e: [
+					{ l: 'keydown', c: 1, m: 'key', k: [13, 27] },
+					{ l: 'keydown', m: 'space', k: [13, 32] }
+				]
 			}
 		],
 		[
@@ -86,11 +86,11 @@ var ast = [
 	[
 		{
 			t: 'button',
-			e: {
-				click: { m: 'sendMsg', v: 'some data' }
-			}
+			e: [
+				{ l: 'click', m: 'sendMsg', v: 'some data' }
+			]
 		},
-		'sendMsg'
+		[['btnText'], 'sendMsg']
 	],
 	{ n: 'list', t: 1 }
 ]
@@ -108,26 +108,26 @@ var template = '  this is a comment\n' +
 '  	-node1\n' +
 '  	>p\n' +
 '  		#class = some class name\n' +
-'  		@click.stop = alertNotice:{{attr.style = color: #666}}\n' +
-'  		/@mousedown = setState\n' +
+'  		@click.shift.alt.stop = alertNotice:{{attr.style = color: #666}}\n' +
+'  		@mousedown = setState\n' +
+'  		@click.capture.stop = capture\n' +
 '  		>span\n' +
-'  	  	.Notice: {{notice = &u[2F804]]]}}\n' +
+'  	  	.Notice: {{notice = ]]}}\n' +
 '  		. test\n' +
 '  		-node2\n' +
 '  		+list1'
 
-var ast2 = eftParser(template)
+var ast2 = parseEft(template)
 
 var data1 = {
 	$data: {
 			class: 'box test class',
 			name: 'Bob',
 			job: 'Assit Alice',
-			notice: 'ooooooops'
+			notice: 'Hold shift and alt and then click here. An alert should pop up'
 	},
 	$methods: {
 		alertNotice: function (info) {
-			console.log('Value passed:', info.value)
 			alert(info.state.$data.notice)
 		}
 	}
@@ -154,7 +154,8 @@ state2.$data.root.text = 'component 2'
 state3.$data.class = 'box'
 state3.$data.name = 'Alice'
 state3.$data.job = 'Developer'
-state4.$data.job = 'Assisting Alice'
+// state3.$data.notice = 'N/A'
+state4.$data.job = 'Assiting Alice'
 
 var data2 = {
 	$data: {
@@ -174,6 +175,33 @@ var data2 = {
 }
 
 state.$update(data2)
+
+var states = []
+
+state2.$data.style = '10000'
+
+state2.$data.btnText = 'Run Test!'
+
+state2.$subscribe('style', function (val) {
+	state2.$data.text = 'Click the button below to run a ' + val + ' components render test.'
+})
+
+state2.$methods.sendMsg = function (info) {
+	var count = parseInt(info.state.$data.style)
+	var startTime = Date.now()
+	for (var i = 0; i < count; i++) states.push(module1.render())
+	// state4.list1.push.apply(state4.list1, states)
+	var endTime = Date.now()
+	for (var i = 0; i < states.length; i++) {
+		states[i].$destroy()
+		states[i] = null
+	}
+	states = []
+	var time = endTime - startTime
+	var msg = '' + count + ' components rendered in ' + time + 'ms.'
+	info.state.$data.text = msg
+	console.log(msg)
+}
 
 // state4.$methods.sendMsg = function(thisState) { alert('The message is "\n' + thisState.$data.text + '"!') }
 

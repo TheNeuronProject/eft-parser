@@ -7,7 +7,7 @@ const uglify = require('rollup-plugin-uglify')
 const progress = require('rollup-plugin-progress')
 
 module.exports = {
-	moduleName: 'eftParser',
+	moduleName: 'parseEft',
 	entry: 'src/eft-parser.js',
 	devDest: 'test/eft-parser.dev.js',
 	proDest: 'dist/eft-parser.min.js',

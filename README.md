@@ -6,11 +6,11 @@ Parser for [ef.js](https://github.com/ClassicOldSong/ef.js) templates
 ## Usage
 ES6
 ``` javascript
-import eftParser from 'eft-parser'
-// use `const eftParser = require('eft-parser')` for node.js
+import parseEft from 'eft-parser'
+// use `const parseEft = require('eft-parser')` for node.js
 
 const template = 'Your awesome template here'
-const ast = eftParser(template)
+const ast = parseEft(template)
 ```
 
 Browser
@@ -18,7 +18,7 @@ Browser
 <script src="dist/eft-parser.js"></script>
 <script>
 	var template = 'Your awesome template here'
-	var ast = eftParser(template)
+	var ast = parseEft(template)
 </script>
 ```
 
