@@ -151,6 +151,7 @@ const getEventOptions = (name) => {
 	const [listener, ...ops] = name.split('.')
 	options.l = listener
 	for (let i of ops) getOption(options, keys, i)
+	if (keys.length > 0) options.k = keys
 
 	return options
 }
