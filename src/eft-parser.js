@@ -1,7 +1,7 @@
 import ESCAPE from './escape-parser.js'
 
 const typeSymbols = '>#%@.-+'.split('')
-const reserved = 'attached data element nodes methods subscribe unsubscribe update destroy'.split(' ').map(i => `$${i}`)
+const reserved = 'attached data element refs methods subscribe unsubscribe update destroy'.split(' ').map(i => `$${i}`)
 const fullMustache = /^\{\{.*\}\}$/
 const mustache = /\{\{.+?\}\}/g
 const spaceIndent = /^(\t*)( *).*/
@@ -63,17 +63,17 @@ const splitDefault = (string) => {
 }
 
 const parseTag = (string) => {
-	const [content, ...name] = string.split('#')
+	const [content, ...ref] = string.split('#')
 	const [tag, ...classes] = content.split('.')
 	const classValue = classes.join('.')
 	if (fullMustache.test(classValue)) return {
 		tag,
-		name: name.join('#'),
+		ref: ref.join('#'),
 		class: splitDefault(classValue)
 	}
 	return {
 		tag,
-		name: name.join('#'),
+		ref: ref.join('#'),
 		class: classes.join(' ')
 	}
 }
@@ -197,7 +197,7 @@ const parseLine = ({line, ast, parsingInfo, i}) => {
 					newNode[0].a = {}
 					newNode[0].a.class = info.class
 				}
-				if (info.name) newNode[0].n = info.name
+				if (info.ref) newNode[0].r = info.name
 				parsingInfo.currentNode.push(newNode)
 				parsingInfo.currentNode = newNode
 				parsingInfo.prevType = 'tag'
