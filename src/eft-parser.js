@@ -197,7 +197,7 @@ const parseLine = ({line, ast, parsingInfo, i}) => {
 					newNode[0].a = {}
 					newNode[0].a.class = info.class
 				}
-				if (info.ref) newNode[0].r = info.name
+				if (info.ref) newNode[0].r = info.ref
 				parsingInfo.currentNode.push(newNode)
 				parsingInfo.currentNode = newNode
 				parsingInfo.prevType = 'tag'
