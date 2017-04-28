@@ -2,9 +2,9 @@ import ESCAPE from './escape-parser.js'
 
 const typeSymbols = '>#%@.-+'.split('')
 const reserved = 'attached data element refs methods subscribe unsubscribe update destroy'.split(' ').map(i => `$${i}`)
-const fullMustache = /^\{\{.*\}\}$/
 const mustache = /\{\{.+?\}\}/g
 const spaceIndent = /^(\t*)( *).*/
+const hashref = /#([^}]|}[^}])*$/
 
 const getErrorMsg = (msg, line = -2) => `Failed to parse eft template: ${msg}. at line ${line + 1}`
 
@@ -54,7 +54,7 @@ const resolveDepth = (ast, depth) => {
 }
 
 const splitDefault = (string) => {
-	string = string.substr(2, string.length - 4)
+	string = string.slice(2, string.length - 2)
 	const [_path, ..._default] = string.split('=')
 	const pathArr = _path.trim().split('.')
 	const defaultVal = ESCAPE(_default.join('=').trim())
@@ -62,41 +62,34 @@ const splitDefault = (string) => {
 	return [pathArr]
 }
 
+const parseText = (string) => {
+	const strs = string.split(mustache)
+	if (strs.length === 1) return ESCAPE(string)
+	const tmpl = [strs.map(ESCAPE)]
+	const mustaches = string.match(mustache)
+	if (mustaches) tmpl.push(...mustaches.map(splitDefault))
+	return tmpl
+}
+
+const dotToSpace = val => val.replace(/\./g, ' ')
+
 const parseTag = (string) => {
-	const [content, ...ref] = string.split('#')
-	const [tag, ...classes] = content.split('.')
-	const classValue = classes.join('.')
-	if (fullMustache.test(classValue)) return {
-		tag,
-		ref: ref.join('#'),
-		class: splitDefault(classValue)
-	}
-	return {
-		tag,
-		ref: ref.join('#'),
-		class: classes.join(' ')
-	}
+	const tagInfo = {}
+	const [tag, ...content] = string.replace(hashref, (val) => {
+		tagInfo.ref = val.slice(1)
+		return ''
+	}).split('.')
+	tagInfo.tag = tag
+	tagInfo.class = parseText(content.join('.'))
+	if (typeof tagInfo.class !== 'string') tagInfo.class[0] = tagInfo.class[0].map(dotToSpace)
+	return tagInfo
 }
 
 const parseNodeProps = (string) => {
 	const splited = string.split('=')
 	const name = splited.shift().trim()
 	const value = splited.join('=').trim()
-	if (fullMustache.test(value)) return { name, value: splitDefault(value) }
-	return { name, value: ESCAPE(value) }
-}
-
-const parseText = (string) => {
-	const parts = []
-	const mustaches = string.match(mustache)
-	if (mustaches) {
-		const texts = string.split(mustache)
-		for (let i = 0; i < texts.length; i++) {
-			if (texts[i]) parts.push(ESCAPE(texts[i]))
-			if (mustaches[i]) parts.push(splitDefault(mustaches[i]))
-		}
-	} else parts.push(ESCAPE(string))
-	return parts
+	return { name, value: parseText(value) }
 }
 
 const setOption = (options, option) => {
@@ -152,17 +145,13 @@ const getEventOptions = (name) => {
 	options.l = listener
 	for (let i of ops) getOption(options, keys, i)
 	if (keys.length > 0) options.k = keys
-
 	return options
 }
 
 const splitEvents = (string) => {
 	const [name, ...value] = string.split(':')
 	const content = value.join(':')
-	if (content) {
-		if (fullMustache.test(content)) return [name.trim(), splitDefault(content)]
-		return [name.trim(), ESCAPE(value.join(':'))]
-	}
+	if (content) return [name.trim(), parseText(content)]
 	return [name.trim()]
 }
 
@@ -230,7 +219,7 @@ const parseLine = ({line, ast, parsingInfo, i}) => {
 				break
 			}
 			case '.': {
-				parsingInfo.currentNode.push(...parseText(content))
+				parsingInfo.currentNode.push(parseText(content))
 				parsingInfo.prevType = 'text'
 				break
 			}
