@@ -87,9 +87,18 @@ const parseTag = (string) => {
 
 const parseNodeProps = (string) => {
 	const splited = string.split('=')
-	const name = splited.shift().trim()
-	const value = splited.join('=').trim()
-	return { name, value: parseText(value) }
+	return {
+		name: splited.shift().trim(),
+		value: parseText(splited.join('=').trim())
+	}
+}
+
+const parseEvent = (string) => {
+	const splited = string.split('=')
+	return {
+		name: splited.shift().trim(),
+		value: splited.join('=').trim()
+	}
 }
 
 const setOption = (options, option) => {
@@ -207,8 +216,7 @@ const parseLine = ({line, ast, parsingInfo, i}) => {
 				break
 			}
 			case '@': {
-				const { name, value } = parseNodeProps(content)
-				if (typeof value !== 'string') throw new SyntaxError(getErrorMsg('Methods should not be wrapped in mustaches', i))
+				const { name, value } = parseEvent(content)
 				if (!parsingInfo.currentNode[0].e) parsingInfo.currentNode[0].e = []
 				const options = getEventOptions(name)
 				const [method, _value] = splitEvents(value)
