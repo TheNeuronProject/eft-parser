@@ -96,7 +96,8 @@ const parseTag = (string) => {
 	}).split('.')
 	tagInfo.tag = tag
 	tagInfo.class = splitLiterals(content.join('.'))
-	if (typeof tagInfo.class !== 'string') tagInfo.class[0] = tagInfo.class[0].map(dotToSpace)
+	if (typeof tagInfo.class === 'string') tagInfo.class = dotToSpace(tagInfo.class).trim()
+	else tagInfo.class[0] = tagInfo.class[0].map(dotToSpace)
 	return tagInfo
 }
 
