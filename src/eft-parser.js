@@ -76,7 +76,9 @@ const pushStr = (textArr, str) => {
 }
 
 const parseText = (string) => {
-	const [strs, ...exprs] = splitLiterals(string)
+	const result = splitLiterals(string)
+	if (typeof result === 'string') return [result]
+	const [strs, ...exprs] = result
 	const textArr = []
 	for (let i = 0; i < exprs.length; i++) {
 		pushStr(textArr, strs[i])
