@@ -62,13 +62,28 @@ const splitDefault = (string) => {
 	return [pathArr]
 }
 
-const parseText = (string) => {
+const splitLiterals = (string) => {
 	const strs = string.split(mustache)
 	if (strs.length === 1) return ESCAPE(string)
 	const tmpl = [strs.map(ESCAPE)]
 	const mustaches = string.match(mustache)
 	if (mustaches) tmpl.push(...mustaches.map(splitDefault))
 	return tmpl
+}
+
+const pushStr = (textArr, str) => {
+	if (str) textArr.push(str)
+}
+
+const parseText = (string) => {
+	const [strs, ...exprs] = splitLiterals(string)
+	const textArr = []
+	for (let i = 0; i < exprs.length; i++) {
+		pushStr(textArr, strs[i])
+		textArr.push(exprs[i])
+	}
+	pushStr(textArr, strs[strs.length - 1])
+	return textArr
 }
 
 const dotToSpace = val => val.replace(/\./g, ' ')
@@ -80,7 +95,7 @@ const parseTag = (string) => {
 		return ''
 	}).split('.')
 	tagInfo.tag = tag
-	tagInfo.class = parseText(content.join('.'))
+	tagInfo.class = splitLiterals(content.join('.'))
 	if (typeof tagInfo.class !== 'string') tagInfo.class[0] = tagInfo.class[0].map(dotToSpace)
 	return tagInfo
 }
@@ -89,7 +104,7 @@ const parseNodeProps = (string) => {
 	const splited = string.split('=')
 	return {
 		name: splited.shift().trim(),
-		value: parseText(splited.join('=').trim())
+		value: splitLiterals(splited.join('=').trim())
 	}
 }
 
@@ -160,7 +175,7 @@ const getEventOptions = (name) => {
 const splitEvents = (string) => {
 	const [name, ...value] = string.split(':')
 	const content = value.join(':')
-	if (content) return [name.trim(), parseText(content)]
+	if (content) return [name.trim(), splitLiterals(content)]
 	return [name.trim()]
 }
 
@@ -227,7 +242,7 @@ const parseLine = ({line, ast, parsingInfo, i}) => {
 				break
 			}
 			case '.': {
-				parsingInfo.currentNode.push(parseText(content))
+				parsingInfo.currentNode.push(...parseText(content))
 				parsingInfo.prevType = 'text'
 				break
 			}
