@@ -65,7 +65,9 @@ const splitDefault = (string) => {
 const splitLiterals = (string) => {
 	const strs = string.split(mustache)
 	if (strs.length === 1) return ESCAPE(string)
-	const tmpl = [strs.map(ESCAPE)]
+	const tmpl = []
+	if (strs.length === 2 && !strs[0] && !strs[1]) tmpl.push(0)
+	else tmpl.push(strs.map(ESCAPE))
 	const mustaches = string.match(mustache)
 	if (mustaches) tmpl.push(...mustaches.map(splitDefault))
 	return tmpl
@@ -99,7 +101,7 @@ const parseTag = (string) => {
 	tagInfo.tag = tag
 	tagInfo.class = splitLiterals(content.join('.'))
 	if (typeof tagInfo.class === 'string') tagInfo.class = dotToSpace(tagInfo.class).trim()
-	else tagInfo.class[0] = tagInfo.class[0].map(dotToSpace)
+	else if (tagInfo.class[0]) tagInfo.class[0] = tagInfo.class[0].map(dotToSpace)
 	return tagInfo
 }
 
