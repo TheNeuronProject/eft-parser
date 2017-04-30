@@ -32,7 +32,7 @@ const getIndent = (string, parsingInfo) => {
 	if (parsingInfo.indentReg) return
 	const spaces = string.match(spaceIndent)[2]
 	if (spaces) {
-		parsingInfo.indentReg = new RegExp(spaces)
+		parsingInfo.indentReg = new RegExp(spaces, 'g')
 	}
 }
 
