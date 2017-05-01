@@ -1,7 +1,7 @@
 import ESCAPE from './escape-parser.js'
 
 const typeSymbols = '>#%@.-+'.split('')
-const reserved = 'attached data element refs methods subscribe unsubscribe update destroy'.split(' ').map(i => `$${i}`)
+const reserved = 'before after parent data element refs methods mount umount subscribe unsubscribe update destroy'.split(' ').map(i => `$${i}`)
 const mustache = /\{\{.+?\}\}/g
 const spaceIndent = /^(\t*)( *).*/
 const hashref = /#([^}]|}[^}])*$/
