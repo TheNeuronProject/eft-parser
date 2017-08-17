@@ -1,7 +1,7 @@
 import ESCAPE from './escape-parser.js'
 
 const typeSymbols = '>#%@.-+'.split('')
-const reserved = '__EFAVATAR__ $parent $key $data $element $refs $methods $mount $umount $subscribe $unsubscribe $update $destroy __DIRECTMOUNT__'.split(' ')
+const reserved = '__EFPLACEHOLDER__ $parent $key $data $element $refs $methods $mount $umount $subscribe $unsubscribe $update $destroy __DIRECTMOUNT__'.split(' ')
 const mustache = /\{\{.+?\}\}/g
 const spaceIndent = /^(\t*)( *).*/
 const hashref = /#([^}]|}[^}])*$/
