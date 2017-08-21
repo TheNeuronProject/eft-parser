@@ -1,18 +1,20 @@
 // Rollup plugins
-const buble = require('rollup-plugin-buble')
-const eslint = require('rollup-plugin-eslint')
-const resolve = require('rollup-plugin-node-resolve')
-const commonjs = require('rollup-plugin-commonjs')
-const uglify = require('rollup-plugin-uglify')
-const progress = require('rollup-plugin-progress')
+import buble from 'rollup-plugin-buble'
+import eslint from 'rollup-plugin-eslint'
+import resolve from 'rollup-plugin-node-resolve'
+import commonjs from 'rollup-plugin-commonjs'
+import uglify from 'rollup-plugin-uglify'
+import progress from 'rollup-plugin-progress'
 
-module.exports = {
-	moduleName: 'parseEft',
-	entry: 'src/eft-parser.js',
+export default {
+	input: 'src/eft-parser.js',
+	output: {
+		name: 'parseEft',
+		format: 'umd',
+		sourcemap: true,
+	},
 	devDest: 'test/eft-parser.dev.js',
 	proDest: 'dist/eft-parser.min.js',
-	format: 'umd',
-	sourceMap: 'inline',
 	plugins: [
 		progress({
 			clearLine: false

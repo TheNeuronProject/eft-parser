@@ -74,4 +74,4 @@ const ESCAPE = (string) => {
 }
 
 // export default ESCAPE
-module.exports = ESCAPE
+export default ESCAPE
