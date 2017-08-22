@@ -31,7 +31,7 @@ export default {
 				modules: false,
 				dangerousForOf: true
 			},
-			objedtAssign: 'Object.assign'
+			objectAssign: 'Object.assign'
 		}),
 		(process.env.NODE_ENV === 'production' && uglify())
 	]

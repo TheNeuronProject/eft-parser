@@ -1,12 +1,12 @@
 {
   "name": "eft-parser",
-  "version": "0.5.11",
+  "version": "0.5.12",
   "description": "ef.js template parser",
   "main": "dist/eft-parser.min.js",
   "module": "src/eft-parser.js",
   "scripts": {
     "dev": "rollup -c ./config/rollup.dev.js -w",
-    "build": "rollup -c ./config/rollup.build.js",
+    "build": "NODE_ENV=production rollup -c ./config/rollup.build.js",
     "lint": "eslint --ext .js src"
   },
   "repository": {
