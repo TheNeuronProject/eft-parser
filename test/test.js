@@ -1,3 +1,5 @@
+var ef = efCore
+
 var template = '\n' +
 '>div.{{class.text = box test}}\n' +
 '	#id = id1\n' +
@@ -26,7 +28,7 @@ var template = '\n' +
 '		.One way binded with particle update:\n' +
 '		>input\n' +
 '			#type = text\n' +
-'			%value = 1: {{class.text}} 2: {{class.text2}}\n' +
+'			%value = "1: {{class.text}} 2: {{class.text2}}"\n' +
 '		>br\n' +
 '		>input\n' +
 '			#type = radio\n' +
@@ -38,7 +40,11 @@ var template = '\n' +
 '			%checked = {{testRadio2}}\n' +
 '		>input\n' +
 '			#type = checkbox\n' +
-'			%checked = {{testCheck}}\n' +
+'			%checked = {{testCheck = true}}\n' +
+'		>input\n' +
+'			#type = checkbox\n' +
+'			#disabled = false\n' +
+'			%checked = {{testCheck = true}}\n' +
 '		>br\n' +
 '		.Input style here: \n' +
 '		>br\n' +
@@ -51,6 +57,9 @@ var template = '\n' +
 '	>button\n' +
 '		@click = sendMsg:some data\n' +
 '		.{{btnText = sendMsg}}\n' +
+'	>button\n' +
+'		@click = nothing\n' +
+'		.Button that does nothing\n' +
 '	+list'
 
 var template2 = '  this is a comment\n' +
@@ -91,15 +100,15 @@ var data1 = {
 	}
 }
 
-var module1 = new ef(ast)
-var module2 = new ef(ast2)
+var module1 = ef.create(ast)
+var module2 = ef.create(ast2)
 
 ef.inform()
 
-var state = module1.render()
-var state2 = module1.render()
-var state3 = module2.render()
-var state4 = module2.render(data1)
+var state = new module1()
+var state2 = new module1()
+var state3 = new module2()
+var state4 = new module2(data1)
 
 state3.list1.push(state4)
 state2.branch = state3
@@ -150,7 +159,7 @@ state2.$methods.sendMsg = function (info) {
 	ef.inform()
 	var count = parseInt(info.state.$data.style)
 	var startTime = Date.now()
-	for (var i = 0; i < count; i++) states.push(module1.render())
+	for (var i = 0; i < count; i++) states.push(new module1())
 	state4.list1.push.apply(state4.list1, states)
 	ef.exec()
 	var endTime = Date.now()
