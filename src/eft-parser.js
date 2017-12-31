@@ -1,4 +1,4 @@
-import ESCAPE from './escape-parser.js'
+import efEscape from './escape-parser.js'
 
 const typeSymbols = '>#%@.-+'.split('')
 const reserved = '__EFPLACEHOLDER__ $parent $key $data $element $refs $methods $mount $umount $subscribe $unsubscribe $update $destroy __DIRECTMOUNT__'.split(' ')
@@ -9,6 +9,18 @@ const hashref = /#([^}]|}[^}])*$/
 const getErrorMsg = (msg, line = -2) => `Failed to parse eft template: ${msg}. at line ${line + 1}`
 
 const isEmpty = string => !string.replace(/\s/, '')
+
+const checkValidType = obj => ['number', 'boolean', 'string'].indexOf(typeof obj) > -1
+
+const ESCAPE = (string) => {
+	try {
+		const parsed = JSON.parse(string)
+		if (['number', 'boolean'].indexOf(typeof parsed) === -1) return efEscape(string)
+		return parsed
+	} catch (e) {
+		return efEscape(string)
+	}
+}
 
 const getOffset = (string, parsingInfo) => {
 	if (parsingInfo.offset !== null) return
@@ -58,7 +70,7 @@ const splitDefault = (string) => {
 	const [_path, ..._default] = string.split('=')
 	const pathArr = _path.trim().split('.')
 	const defaultVal = ESCAPE(_default.join('=').trim())
-	if (defaultVal) return [pathArr, defaultVal]
+	if (checkValidType(defaultVal)) return [pathArr, defaultVal]
 	return [pathArr]
 }
 
@@ -67,7 +79,7 @@ const splitLiterals = (string) => {
 	if (strs.length === 1) return ESCAPE(string)
 	const tmpl = []
 	if (strs.length === 2 && !strs[0] && !strs[1]) tmpl.push(0)
-	else tmpl.push(strs.map(ESCAPE))
+	else tmpl.push(strs.map(efEscape))
 	const mustaches = string.match(mustache)
 	if (mustaches) tmpl.push(...mustaches.map(splitDefault))
 	return tmpl
@@ -79,7 +91,7 @@ const pushStr = (textArr, str) => {
 
 const parseText = (string) => {
 	const result = splitLiterals(string)
-	if (typeof result === 'string') return [result]
+	if (checkValidType(result)) return [`${result}`]
 	const [strs, ...exprs] = result
 	const textArr = []
 	for (let i = 0; i < exprs.length; i++) {
@@ -276,7 +288,7 @@ const parseLine = ({line, ast, parsingInfo, i}) => {
 }
 
 const parseEft = (template) => {
-	if (!template) throw new TypeError(getErrorMsg('Template required, but nothing present'))
+	if (!template) throw new TypeError(getErrorMsg('Template required, but nothing given'))
 	const tplType = typeof template
 	if (tplType !== 'string') throw new TypeError(getErrorMsg(`Expected a string, but got a(n) ${tplType}`))
 	const lines = template.split(/\r?\n/)
