@@ -6,6 +6,8 @@ base.output.sourcemap = process.env.BUILD_ENV === 'DEMO' || process.env.BUILD_EN
 
 delete base.bundle
 delete base.devPath
+delete base.devDest
 delete base.proPath
+delete base.proDest
 
 export default base
