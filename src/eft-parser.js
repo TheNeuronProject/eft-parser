@@ -13,12 +13,13 @@ const isEmpty = string => !string.replace(/\s/, '')
 const checkValidType = obj => ['number', 'boolean', 'string'].indexOf(typeof obj) > -1
 
 const ESCAPE = (string) => {
+	if (!string) return [string, false]
 	try {
 		const parsed = JSON.parse(string)
-		if (['number', 'boolean'].indexOf(typeof parsed) === -1) return efEscape(string)
-		return parsed
+		if (['number', 'boolean'].indexOf(typeof parsed) === -1) return [efEscape(string), true]
+		return [parsed, false]
 	} catch (e) {
-		return efEscape(string)
+		return [efEscape(string), true]
 	}
 }
 
@@ -69,14 +70,14 @@ const splitDefault = (string) => {
 	string = string.slice(2, string.length - 2)
 	const [_path, ..._default] = string.split('=')
 	const pathArr = _path.trim().split('.')
-	const defaultVal = ESCAPE(_default.join('=').trim())
-	if (checkValidType(defaultVal)) return [pathArr, defaultVal]
+	const [defaultVal, escaped] = ESCAPE(_default.join('=').trim())
+	if (checkValidType(defaultVal) && (escaped || (!escaped && defaultVal !== ''))) return [pathArr, defaultVal]
 	return [pathArr]
 }
 
 const splitLiterals = (string) => {
 	const strs = string.split(mustache)
-	if (strs.length === 1) return ESCAPE(string)
+	if (strs.length === 1) return ESCAPE(string)[0]
 	const tmpl = []
 	if (strs.length === 2 && !strs[0] && !strs[1]) tmpl.push(0)
 	else tmpl.push(strs.map(efEscape))
