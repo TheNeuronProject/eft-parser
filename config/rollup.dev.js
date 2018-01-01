@@ -12,4 +12,10 @@ base.watch = {
 	include: 'src/**'
 }
 
+delete base.bundle
+delete base.devPath
+delete base.devDest
+delete base.proPath
+delete base.proDest
+
 export default base
