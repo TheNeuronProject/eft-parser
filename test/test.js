@@ -64,6 +64,7 @@ var template = '\n' +
 
 var template2 = '  this is a comment\n' +
 '  >div.{{class = some class name}}\n' +
+'    @some&.custom&.event = al&&ert\n' +
 '    #style = {{attr.style}}\n' +
 '    #id = testdiv\n' +
 '  	#some-attr = some text\n' +
@@ -77,7 +78,7 @@ var template2 = '  this is a comment\n' +
 '  		#class = some class name\n' +
 '  		@click.shift.alt.stop = alertNotice:{{attr.style = color: #666}}\n' +
 '  		@mousedown = setState\n' +
-'  		@click.capture.stop = capture\n' +
+'  		@click.ca&pture.stop = capture&&:name\n' +
 '  		>span\n' +
 '  	  	.Notice: {{notice = ]]}}\n' +
 '  		. test\n' +

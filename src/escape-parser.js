@@ -1,5 +1,6 @@
 // Set the escape character
 const char = '&'
+const doubleChar = char + char
 
 // Initlize RegExp
 const oct = new RegExp(`\\${char}[0-7]{1,3}`, 'g')
@@ -47,13 +48,13 @@ const X2C = (val) => {
 	return String.fromCharCode(val)
 }
 
-const ESCAPE = (string) => {
+const efEscape = (string) => {
 	// Split strings
-	const splited = string.split(char + char)
+	const splitArr = string.split(doubleChar)
 	const escaped = []
 
 	// Escape all known escape characters
-	for (let i of splited) {
+	for (let i of splitArr) {
 		const escapedStr = i
 			.replace(oct, O2C)
 			.replace(ucp, UC2C)
@@ -73,5 +74,29 @@ const ESCAPE = (string) => {
 	return escaped.join(char)
 }
 
-// export default ESCAPE
-export default ESCAPE
+const checkEscape = string => string[string.length - 1] === char
+
+const splitWith = (string, char) => {
+	const splitArr = string.split(char)
+	const escapedSplit = []
+	let escaped = false
+	for (let i of splitArr) {
+		if (escaped) escapedSplit[escapedSplit.length - 1] += `${char}${i}`
+		else escapedSplit.push(i)
+		escaped = checkEscape(i)
+	}
+	return escapedSplit
+}
+
+const splitBy = (string, char) => {
+	const splitArr = string.split(doubleChar)
+	const escaped = splitWith(splitArr.shift(), char)
+	for (let i of splitArr) {
+		const escapedSplit = splitWith(i, char)
+		escaped[escaped.length - 1] += `${doubleChar}${escapedSplit.shift()}`
+		escaped.push(...escapedSplit)
+	}
+	return escaped
+}
+
+export { efEscape, splitBy }
