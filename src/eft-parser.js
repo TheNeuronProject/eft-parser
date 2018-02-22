@@ -1,6 +1,6 @@
-import efEscape from './escape-parser.js'
+import { efEscape, splitBy } from './escape-parser.js'
 
-const typeSymbols = '>#%@.-+'.split('')
+const typeSymbols = '>#%@.-+'
 const reserved = '__EFPLACEHOLDER__ $parent $key $data $element $refs $methods $mount $umount $subscribe $unsubscribe $update $destroy __DIRECTMOUNT__'.split(' ')
 const mustache = /\{\{.+?\}\}/g
 const spaceIndent = /^(\t*)( *).*/
@@ -68,8 +68,8 @@ const resolveDepth = (ast, depth) => {
 
 const splitDefault = (string) => {
 	string = string.slice(2, string.length - 2)
-	const [_path, ..._default] = string.split('=')
-	const pathArr = _path.trim().split('.')
+	const [_path, ..._default] = splitBy(string, '=')
+	const pathArr = splitBy(_path.trim(), '.').map(efEscape)
 	const [defaultVal, escaped] = ESCAPE(_default.join('=').trim())
 	if (checkValidType(defaultVal) && (escaped || (!escaped && defaultVal !== ''))) return [pathArr, defaultVal]
 	return [pathArr]
@@ -107,11 +107,11 @@ const dotToSpace = val => val.replace(/\./g, ' ')
 
 const parseTag = (string) => {
 	const tagInfo = {}
-	const [tag, ...content] = string.replace(hashref, (val) => {
+	const [tag, ...content] = splitBy(string.replace(hashref, (val) => {
 		tagInfo.ref = val.slice(1)
 		return ''
-	}).split('.')
-	tagInfo.tag = tag
+	}), '.')
+	tagInfo.tag = efEscape(tag)
 	tagInfo.class = splitLiterals(content.join('.'))
 	if (typeof tagInfo.class === 'string') tagInfo.class = dotToSpace(tagInfo.class).trim()
 	else if (tagInfo.class[0]) tagInfo.class[0] = tagInfo.class[0].map(dotToSpace)
@@ -119,15 +119,15 @@ const parseTag = (string) => {
 }
 
 const parseNodeProps = (string) => {
-	const splited = string.split('=')
+	const splited = splitBy(string, '=')
 	return {
-		name: splited.shift().trim(),
+		name: efEscape(splited.shift().trim()),
 		value: splitLiterals(splited.join('=').trim())
 	}
 }
 
 const parseEvent = (string) => {
-	const splited = string.split('=')
+	const splited = splitBy(string, '=')
 	return {
 		name: splited.shift().trim(),
 		value: splited.join('=').trim()
@@ -169,32 +169,33 @@ const setOption = (options, option) => {
 			break
 		}
 		default: {
-			console.warn(`Abandoned unsupported event option '${option}'.`)
+			console.warn(`Abandoned unsupported eft event option '${option}'.`)
 		}
 	}
 }
 
 const getOption = (options, keys, option) => {
 	const keyCode = parseInt(option, 10)
-	if (isNaN(keyCode)) return setOption(options, option)
+	if (isNaN(keyCode)) return setOption(options, efEscape(option))
 	keys.push(keyCode)
 }
 
 const getEventOptions = (name) => {
 	const options = {}
 	const keys = []
-	const [listener, ...ops] = name.split('.')
-	options.l = listener
+	const [listener, ...ops] = splitBy(name, '.')
+	options.l = efEscape(listener)
 	for (let i of ops) getOption(options, keys, i)
 	if (keys.length > 0) options.k = keys
 	return options
 }
 
 const splitEvents = (string) => {
-	const [name, ...value] = string.split(':')
+	const [name, ...value] = splitBy(string, ':')
 	const content = value.join(':')
-	if (content) return [name.trim(), splitLiterals(content)]
-	return [name.trim()]
+	const escapedName = efEscape(name.trim())
+	if (content) return [escapedName, splitLiterals(content)]
+	return [escapedName]
 }
 
 const parseLine = ({line, ast, parsingInfo, i}) => {

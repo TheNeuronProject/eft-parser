@@ -12,6 +12,7 @@ gen/
 .fuse_*
 yarn.lock
 cache/
+.DS_Store
 
 # Project files
 dist/*
@@ -22,3 +23,4 @@ node_modules/
 
 # local tools
 publish
+/test/eft-parser.dev.js.map
