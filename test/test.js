@@ -62,28 +62,28 @@ var template = '\n' +
 '		.Button that does nothing\n' +
 '	+list'
 
-var template2 = '  this is a comment\n' +
-'  >div.{{class = some class name}}\n' +
-'    @some&.custom&.event = al&&ert\n' +
-'    #style = {{attr.style}}\n' +
-'    #id = testdiv\n' +
-'  	#some-attr = some text\n' +
-'  	#content =\n' +
-'  	%title = {{name}}\n' +
-'  	%anotherProperty = text\n' +
-'  	.Name: {{name}}&nJob: {{job}}\n' +
-'  	>br\n' +
-'  	-node1\n' +
-'  	>p\n' +
-'  		#class = some class name\n' +
-'  		@click.shift.alt.stop = alertNotice:{{attr.style = color: #666}}\n' +
-'  		@mousedown = setState\n' +
-'  		@click.ca&pture.stop = capture&&:name\n' +
-'  		>span\n' +
-'  	  	.Notice: {{notice = ]]}}\n' +
-'  		. test\n' +
-'  		-node2\n' +
-'  		+list1'
+var template2 = '   this is a comment\n' +
+'   >div.{{class = some class name}}\n' +
+'     @some&.custom&.event = al&&ert\n' +
+'     #style = {{attr.style}}\n' +
+'     #id = testdiv\n' +
+'   	#some-attr = some text\n' +
+'   	#content =\n' +
+'   	%title = {{name}}\n' +
+'   	%anotherProperty = text\n' +
+'   	.Name: {{name}}&nJob: {{job}}\n' +
+'   	>br\n' +
+'   	-node1\n' +
+'   	>p\n' +
+'   		#class = some class name\n' +
+'   		@click.shift.alt.stop = alertNotice:{{attr.style = color: #666}}\n' +
+'   		@mousedown = setState\n' +
+'   		@click.ca&pture.stop = capture&&:name\n' +
+'   		>span\n' +
+'   	  	.Notice: {{notice = ]]}}\n' +
+'   		. test\n' +
+'   		-node2\n' +
+'   		+list1'
 var ast = parseEft(template)
 var ast2 = parseEft(template2)
 
