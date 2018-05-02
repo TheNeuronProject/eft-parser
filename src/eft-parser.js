@@ -1,7 +1,10 @@
 import { efEscape, splitBy } from './escape-parser.js'
 
 const typeSymbols = '>#%@.-+'
-const reserved = '__EFPLACEHOLDER__ $parent $key $data $element $refs $methods $mount $umount $subscribe $unsubscribe $update $destroy __DIRECTMOUNT__'.split(' ')
+const reserved = [
+	'$ctx', '$data', '$refs', '$methods', '$mount', '$umount',
+	'$subscribe', '$unsubscribe', '$update', '$destroy', '__DIRECTMOUNT__'
+]
 const mustache = /\{\{.+?\}\}/g
 const spaceIndent = /^(\t*)( *).*/
 const hashref = /#([^}]|}[^}])*$/
@@ -26,7 +29,7 @@ const ESCAPE = (string) => {
 const getOffset = (string, parsingInfo) => {
 	if (parsingInfo.offset !== null) return
 	parsingInfo.offset = string.match(/\s*/)[0]
-	if (parsingInfo.offset) parsingInfo.offsetReg = new RegExp(`^${parsingInfo.offset}`)
+	if (parsingInfo.offset) parsingInfo.offsetReg = parsingInfo.offset
 }
 
 const removeOffset = (string, parsingInfo, i) => {
@@ -200,10 +203,12 @@ const splitEvents = (string) => {
 
 const parseLine = ({line, ast, parsingInfo, i}) => {
 	if (isEmpty(line)) return
-	getIndent(line, parsingInfo)
 	getOffset(line, parsingInfo)
 
-	let { depth, content } = getDepth(removeOffset(line, parsingInfo, i), parsingInfo, i)
+	const trimmedLine = removeOffset(line, parsingInfo, i)
+	getIndent(trimmedLine, parsingInfo)
+
+	let { depth, content } = getDepth(trimmedLine, parsingInfo, i)
 
 	if (content) {
 		if (depth < 0 || depth - parsingInfo.prevDepth > 1 || (depth - parsingInfo.prevDepth === 1 && ['comment', 'tag'].indexOf(parsingInfo.prevType) === -1) || (parsingInfo.prevType !== 'comment' && depth === 0 && parsingInfo.topExists)) throw new SyntaxError(getErrorMsg(`Expected indent to be grater than 0 and less than ${parsingInfo.prevDepth + 1}, but got ${depth}`, i))
