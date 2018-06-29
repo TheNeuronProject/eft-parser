@@ -1,5 +1,3 @@
-var ef = efCore
-
 var template = '\n' +
 '>div.{{class.text = box test}}\n' +
 '	#id = id1\n' +
@@ -8,6 +6,12 @@ var template = '\n' +
 '	.{{root.text}}\n' +
 '	>br\n' +
 '	.{{class.text}}\n' +
+'	>pre\n' +
+'		|Line 1\n' +
+'		|Line 2\n' +
+'		|Line 3, section 1,\n' +
+'		. section 2\n' +
+'		|Line 4\n' +
 '	>div#testRef\n' +
 '		#style = {{style}}\n' +
 '		.text1{{info.node1}}\n' +
@@ -182,5 +186,5 @@ state2.$methods.sendMsg = function (info) {
 }
 
 // state4.$methods.sendMsg = function(thisState) { alert('The message is "\n' + thisState.$data.text + '"!') }
+state.$mount({target: document.body})
 ef.exec()
-document.querySelector('body').appendChild(state.$element)
