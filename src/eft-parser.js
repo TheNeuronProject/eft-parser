@@ -270,6 +270,12 @@ const parseLine = ({line, ast, parsingInfo, i}) => {
 				parsingInfo.prevType = 'text'
 				break
 			}
+			case '|': {
+				if (parsingInfo.currentNode.length > 1) content = `\n${content}`
+				parsingInfo.currentNode.push(...parseText(content))
+				parsingInfo.prevType = 'multiline-text'
+				break
+			}
 			case '-': {
 				if (reserved.indexOf(content) !== -1) throw new SyntaxError(getErrorMsg(`Reserved name '${content}' should not be used`, i))
 				parsingInfo.currentNode.push({
