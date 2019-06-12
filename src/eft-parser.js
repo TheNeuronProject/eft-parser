@@ -59,7 +59,7 @@ const getDepth = (string, parsingInfo, i) => {
 		depth = str.length
 		return ''
 	})
-	if (/^\s/.test(content)) throw new SyntaxError(getErrorMsg('Bad indent', i))
+	if ((/^\s/).test(content)) throw new SyntaxError(getErrorMsg('Bad indent', i))
 	return { depth, content }
 }
 
@@ -214,7 +214,6 @@ const parseLine = ({line, ast, parsingInfo, i}) => {
 		if (depth < 0 || depth - parsingInfo.prevDepth > 1 || (depth - parsingInfo.prevDepth === 1 && ['comment', 'tag'].indexOf(parsingInfo.prevType) === -1) || (parsingInfo.prevType !== 'comment' && depth === 0 && parsingInfo.topExists)) throw new SyntaxError(getErrorMsg(`Expected indent to be grater than 0 and less than ${parsingInfo.prevDepth + 1}, but got ${depth}`, i))
 		const type = content[0]
 		content = content.slice(1)
-		if (!parsingInfo.topExists && typeSymbols.indexOf(type) >= 0 && type !== '>') throw new SyntaxError(getErrorMsg('No top level entry', i))
 		if (!content && typeSymbols.indexOf(type) >= 0) throw new SyntaxError(getErrorMsg('Empty content', i))
 		// Jump back to upper level
 		if (depth < parsingInfo.prevDepth || (depth === parsingInfo.prevDepth && parsingInfo.prevType === 'tag')) parsingInfo.currentNode = resolveDepth(ast, depth)
@@ -222,10 +221,6 @@ const parseLine = ({line, ast, parsingInfo, i}) => {
 
 		switch (type) {
 			case '>': {
-				if (!parsingInfo.topExists) {
-					parsingInfo.topExists = true
-					parsingInfo.minDepth = depth
-				}
 				const info = parseTag(content)
 				const newNode = [{
 					t: info.tag
@@ -305,7 +300,7 @@ const parseEft = (template) => {
 	const tplType = typeof template
 	if (tplType !== 'string') throw new TypeError(getErrorMsg(`Expected a string, but got a(n) ${tplType}`))
 	const lines = template.split(/\r?\n/)
-	const ast = []
+	const ast = [{t: 0}]
 	const parsingInfo = {
 		indentReg: null,
 		prevDepth: 0,
@@ -317,8 +312,9 @@ const parseEft = (template) => {
 	}
 	for (let i = 0; i < lines.length; i++) parseLine({line: lines[i], ast, parsingInfo, i})
 
-	if (ast[0]) return ast[0]
-	throw new SyntaxError(getErrorMsg('Nothing to be parsed', lines.length - 1))
+	if (ast.length <= 1) throw new SyntaxError(getErrorMsg('Nothing to be parsed', lines.length - 1))
+	if (ast.length === 2 && !Array.isArray(ast[1][0])) return ast[1]
+	return ast
 }
 
 export default parseEft

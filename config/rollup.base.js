@@ -1,9 +1,9 @@
 // Rollup plugins
 import buble from 'rollup-plugin-buble'
-import eslint from 'rollup-plugin-eslint'
+import {eslint} from 'rollup-plugin-eslint'
 import resolve from 'rollup-plugin-node-resolve'
 import commonjs from 'rollup-plugin-commonjs'
-import { uglify } from 'rollup-plugin-uglify'
+import {uglify} from 'rollup-plugin-uglify'
 import progress from 'rollup-plugin-progress'
 
 export default {
@@ -21,8 +21,6 @@ export default {
 		}),
 		eslint(),
 		resolve({
-			jsnext: true,
-			main: true,
 			browser: true,
 		}),
 		commonjs(),

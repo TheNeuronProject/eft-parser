@@ -87,7 +87,9 @@ var template2 = '   this is a comment\n' +
 '   	  	.Notice: {{notice = ]]}}\n' +
 '   		. test\n' +
 '   		-node2\n' +
-'   		+list1'
+'   		+list1\n' +
+'   >div.{{class = some class name}}\n' +
+'   .Fragment test {{class}}'
 var ast = parseEft(template)
 var ast2 = parseEft(template2)
 
