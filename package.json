@@ -1,6 +1,6 @@
 {
   "name": "eft-parser",
-  "version": "0.8.2",
+  "version": "0.9.0",
   "description": "ef.js template parser",
   "main": "dist/eft-parser.min.js",
   "module": "src/eft-parser.js",
