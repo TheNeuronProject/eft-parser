@@ -313,7 +313,7 @@ const parseEft = (template) => {
 	for (let i = 0; i < lines.length; i++) parseLine({line: lines[i], ast, parsingInfo, i})
 
 	if (ast.length <= 1) throw new SyntaxError(getErrorMsg('Nothing to be parsed', lines.length - 1))
-	if (ast.length === 2 && !Array.isArray(ast[1][0])) return ast[1]
+	if (ast.length === 2 && Array.isArray(ast[1]) && Object.hasOwnProperty.call(ast[1][0], 't')) return ast[1]
 	return ast
 }
 
