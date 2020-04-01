@@ -2,8 +2,8 @@ import { efEscape, splitBy } from './escape-parser.js'
 
 const typeSymbols = '>#%@.-+'
 const reserved = [
-	'$ctx', '$data', '$refs', '$methods', '$mount', '$umount',
-	'$subscribe', '$unsubscribe', '$update', '$destroy', '__DIRECTMOUNT__'
+	'$ctx', '$refs', '$data', '$methods', '$mount', '$umount', '$subscribe', '$unsubscribe', '$update',
+	'$dispatch', '$emit', '$on', '$off', '$destroy', '__DIRECTMOUNT__'
 ]
 const mustache = /\{\{.+?\}\}/g
 const spaceIndent = /^(\t*)( *).*/
