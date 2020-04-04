@@ -121,19 +121,27 @@ const parseTag = (string) => {
 	return tagInfo
 }
 
-const parseNodeProps = (string) => {
-	const splited = splitBy(string, '=')
+const parseNodeAttrs = (string) => {
+	const splitted = splitBy(string, '=')
 	return {
-		name: efEscape(splited.shift().trim()),
-		value: splitLiterals(splited.join('=').trim())
+		name: efEscape(splitted.shift().trim()),
+		value: splitLiterals(splitted.join('=').trim())
+	}
+}
+
+const parseNodeProps = (string) => {
+	const splitted = splitBy(string, '=')
+	return {
+		propPath: splitBy(splitted.shift().trim(), '.').map(efEscape),
+		value: splitLiterals(splitted.join('=').trim())
 	}
 }
 
 const parseEvent = (string) => {
-	const splited = splitBy(string, '=')
+	const splitted = splitBy(string, '=')
 	return {
-		name: splited.shift().trim(),
-		value: splited.join('=').trim()
+		name: splitted.shift().trim(),
+		value: splitted.join('=').trim()
 	}
 }
 
@@ -236,16 +244,16 @@ const parseLine = ({line, ast, parsingInfo, i}) => {
 				break
 			}
 			case '#': {
-				const { name, value } = parseNodeProps(content)
+				const { name, value } = parseNodeAttrs(content)
 				if (!parsingInfo.currentNode[0].a) parsingInfo.currentNode[0].a = {}
 				parsingInfo.currentNode[0].a[name] = value
 				parsingInfo.prevType = 'attr'
 				break
 			}
 			case '%': {
-				const { name, value } = parseNodeProps(content)
-				if (!parsingInfo.currentNode[0].p) parsingInfo.currentNode[0].p = {}
-				parsingInfo.currentNode[0].p[name] = value
+				const { propPath, value } = parseNodeProps(content)
+				if (!parsingInfo.currentNode[0].p) parsingInfo.currentNode[0].p = []
+				parsingInfo.currentNode[0].p.push([propPath, value])
 				parsingInfo.prevType = 'prop'
 				break
 			}

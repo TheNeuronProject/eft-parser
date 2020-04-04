@@ -24,3 +24,4 @@ node_modules/
 # local tools
 publish
 /test/eft-parser.dev.js.map
+/test/ef-core.dev.js.map
