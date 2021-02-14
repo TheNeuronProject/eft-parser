@@ -29,7 +29,7 @@ Browser
 $ git clone https://github.com/ClassicOldSong/eft-parser.git
 $ cd eft-parser
 $ npm install
-$ npm run dev
+$ npm start
 ```
 Then you can test it out in the opening browser window.
 

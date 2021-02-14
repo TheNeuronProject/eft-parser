@@ -121,22 +121,6 @@ const parseTag = (string) => {
 	return tagInfo
 }
 
-const parseNodeAttrs = (string) => {
-	const splitted = splitBy(string, '=')
-	return {
-		name: efEscape(splitted.shift().trim()),
-		value: splitLiterals(splitted.join('=').trim())
-	}
-}
-
-const parseNodeProps = (string) => {
-	const splitted = splitBy(string, '=')
-	return {
-		propPath: splitBy(splitted.shift().trim(), '.').map(efEscape),
-		value: splitLiterals(splitted.join('=').trim())
-	}
-}
-
 const parseEvent = (string) => {
 	const splitted = splitBy(string, '=')
 	return {
@@ -180,7 +164,7 @@ const setOption = (options, option) => {
 			break
 		}
 		default: {
-			console.warn(`Abandoned unsupported eft event option '${option}'.`)
+			console.warn(`Dropped unsupported eft event option '${option}'.`)
 		}
 	}
 }
@@ -207,6 +191,26 @@ const splitEvents = (string) => {
 	const escapedName = efEscape(name.trim())
 	if (content) return [escapedName, splitLiterals(content)]
 	return [escapedName]
+}
+
+const parseNodeProps = (string) => {
+	const splitted = splitBy(string, '=')
+	const propDef = splitted.shift().trim()
+	const [propPathStr, syncTriggerStr] = splitBy(propDef, '@')
+	const syncTrigger = syncTriggerStr && getEventOptions(syncTriggerStr)
+	return {
+		propPath: splitBy(propPathStr, '.').map(efEscape),
+		value: splitLiterals(splitted.join('=').trim()),
+		syncTrigger
+	}
+}
+
+const parseNodeAttrs = (string) => {
+	const splitted = splitBy(string, '=')
+	return {
+		name: efEscape(splitted.shift().trim()),
+		value: splitLiterals(splitted.join('=').trim())
+	}
 }
 
 const parseLine = ({line, ast, parsingInfo, i}) => {
@@ -251,9 +255,11 @@ const parseLine = ({line, ast, parsingInfo, i}) => {
 				break
 			}
 			case '%': {
-				const { propPath, value } = parseNodeProps(content)
+				const { propPath, value, syncTrigger } = parseNodeProps(content)
+				const propInfo = [propPath, value]
+				if (syncTrigger) propInfo.push(syncTrigger)
 				if (!parsingInfo.currentNode[0].p) parsingInfo.currentNode[0].p = []
-				parsingInfo.currentNode[0].p.push([propPath, value])
+				parsingInfo.currentNode[0].p.push(propInfo)
 				parsingInfo.prevType = 'prop'
 				break
 			}
