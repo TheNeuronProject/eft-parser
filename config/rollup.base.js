@@ -1,6 +1,6 @@
 // Rollup plugins
 import {eslint} from 'rollup-plugin-eslint'
-import {uglify} from 'rollup-plugin-uglify'
+import {terser} from 'rollup-plugin-terser'
 import buble from '@rollup/plugin-buble'
 import resolve from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
@@ -31,6 +31,6 @@ export default {
 			},
 			objectAssign: 'Object.assign'
 		}),
-		(process.env.NODE_ENV === 'production' && uglify())
+		(process.env.NODE_ENV === 'production' && terser())
 	]
 }
