@@ -1,19 +1,19 @@
 // Set the escape character
-const char = '&'
-const doubleChar = char + char
+const escapeChar = '&'
+const doubleEscapeChar = escapeChar + escapeChar
 
 // Initlize RegExp
-const oct = new RegExp(`\\${char}[0-7]{1,3}`, 'g')
-const ucp = new RegExp(`\\${char}u\\[.*?\\]`, 'g')
-const uni = new RegExp(`\\${char}u.{0,4}`, 'g')
-const hex = new RegExp(`\\${char}x.{0,2}`, 'g')
-const esc = new RegExp(`\\${char}`, 'g')
-const b = new RegExp(`\\${char}b`, 'g')
-const t = new RegExp(`\\${char}t`, 'g')
-const n = new RegExp(`\\${char}n`, 'g')
-const v = new RegExp(`\\${char}v`, 'g')
-const f = new RegExp(`\\${char}f`, 'g')
-const r = new RegExp(`\\${char}r`, 'g')
+const oct = new RegExp(`\\${escapeChar}[0-7]{1,3}`, 'g')
+const ucp = new RegExp(`\\${escapeChar}u\\[.*?\\]`, 'g')
+const uni = new RegExp(`\\${escapeChar}u.{0,4}`, 'g')
+const hex = new RegExp(`\\${escapeChar}x.{0,2}`, 'g')
+const esc = new RegExp(`\\${escapeChar}`, 'g')
+const b = new RegExp(`\\${escapeChar}b`, 'g')
+const t = new RegExp(`\\${escapeChar}t`, 'g')
+const n = new RegExp(`\\${escapeChar}n`, 'g')
+const v = new RegExp(`\\${escapeChar}v`, 'g')
+const f = new RegExp(`\\${escapeChar}f`, 'g')
+const r = new RegExp(`\\${escapeChar}r`, 'g')
 
 // Escape octonary sequence
 const O2C = () => {
@@ -50,7 +50,7 @@ const X2C = (val) => {
 
 const efEscape = (string) => {
 	// Split strings
-	const splitArr = string.split(doubleChar)
+	const splitArr = string.split(doubleEscapeChar)
 	const escaped = []
 
 	// Escape all known escape characters
@@ -71,10 +71,10 @@ const efEscape = (string) => {
 		escaped.push(escapedStr)
 	}
 	// Return escaped string
-	return escaped.join(char)
+	return escaped.join(escapeChar)
 }
 
-const checkEscape = string => string[string.length - 1] === char
+const checkEscape = string => string[string.length - 1] === escapeChar
 
 const splitWith = (string, char) => {
 	const splitArr = string.split(char)
@@ -89,11 +89,11 @@ const splitWith = (string, char) => {
 }
 
 const splitBy = (string, char) => {
-	const splitArr = string.split(doubleChar)
+	const splitArr = string.split(doubleEscapeChar)
 	const escaped = splitWith(splitArr.shift(), char)
 	for (let i of splitArr) {
 		const escapedSplit = splitWith(i, char)
-		escaped[escaped.length - 1] += `${doubleChar}${escapedSplit.shift()}`
+		escaped[escaped.length - 1] += `${doubleEscapeChar}${escapedSplit.shift()}`
 		escaped.push(...escapedSplit)
 	}
 	return escaped
