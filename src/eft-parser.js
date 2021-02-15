@@ -196,11 +196,13 @@ const splitEvents = (string) => {
 const parseNodeProps = (string) => {
 	const splitted = splitBy(string, '=')
 	const propDef = splitted.shift().trim()
-	const [propPathStr, syncTriggerStr] = splitBy(propDef, '@')
+	const [propPathStrRaw, syncTriggerStr] = splitBy(propDef, '@')
+	const [propPathStr, updateOnly] = splitBy(propPathStrRaw, '!')
 	const syncTrigger = syncTriggerStr && getEventOptions(syncTriggerStr)
 	return {
 		propPath: splitBy(propPathStr, '.').map(efEscape),
 		value: splitLiterals(splitted.join('=').trim()),
+		updateOnly,
 		syncTrigger
 	}
 }
@@ -255,9 +257,17 @@ const parseLine = ({line, ast, parsingInfo, i}) => {
 				break
 			}
 			case '%': {
-				const { propPath, value, syncTrigger } = parseNodeProps(content)
+				const { propPath, value, updateOnly, syncTrigger } = parseNodeProps(content)
 				const propInfo = [propPath, value]
-				if (syncTrigger) propInfo.push(syncTrigger)
+				if (syncTrigger) {
+					propInfo.push(syncTrigger)
+					if (updateOnly === '') {
+						propInfo.push(true)
+					}
+				} else if (updateOnly === '') {
+					propInfo.push(null)
+					propInfo.push(true)
+				}
 				if (!parsingInfo.currentNode[0].p) parsingInfo.currentNode[0].p = []
 				parsingInfo.currentNode[0].p.push(propInfo)
 				parsingInfo.prevType = 'prop'
