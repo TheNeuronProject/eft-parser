@@ -163,8 +163,21 @@ const setOption = (options, option) => {
 			options.u = 1
 			break
 		}
+		case 'passive': {
+			options.e = 1
+			delete options.p
+			break
+		}
+		case '!passive': {
+			options.e = 0
+			break
+		}
+		case 'once': {
+			options.o = 1
+			break
+		}
 		default: {
-			console.warn(`Dropped unsupported eft event option '${option}'.`)
+			console.warn(`Unsupported event option '${option}' will be dropped.`)
 		}
 	}
 }
@@ -262,11 +275,10 @@ const parseLine = ({line, ast, parsingInfo, i}) => {
 				if (syncTrigger) {
 					propInfo.push(syncTrigger)
 					if (updateOnly === '') {
-						propInfo.push(true)
+						propInfo.push(1)
 					}
 				} else if (updateOnly === '') {
-					propInfo.push(null)
-					propInfo.push(true)
+					propInfo.push(0, 1)
 				}
 				if (!parsingInfo.currentNode[0].p) parsingInfo.currentNode[0].p = []
 				parsingInfo.currentNode[0].p.push(propInfo)
