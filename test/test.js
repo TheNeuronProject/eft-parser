@@ -321,6 +321,7 @@ const efLogic = class extends LogicContainer {
 	}
 }
 
+// Custom logic component test
 const App = scoped(create(parseEft(`
 >br
 >input
@@ -351,3 +352,86 @@ app.list[0].list.push(new App({$data: {show: false, layer: 2}}))
 
 
 app.$mount({target: document.body})
+
+
+// Custom sync trigger test
+const MyAudioPlayer = create(parseEft(`
+>br
+>audio
+	%currentTime@timeupdate = {{currentTime}}
+	%duration!@canplay = {{duration}}
+	%src = {{src}}
+	%autoplay = {{autoplay = true}}
+	#controls
+>div
+	.Select an audio file: &
+	>input
+		#type = file
+		#accept = audio/*
+		%files!@change = {{files}}
+	>br
+	.Custom progress bar: &
+	>input
+		#type = range
+		#step = 0.01
+		#max = {{duration = 0}}
+		%value = {{currentTime = 0}}
+	>br
+	.Autoplay: &
+	>input
+		#type = checkbox
+		%checked = {{autoplay}}
+	>pre
+		|Current time: {{currentTime}}
+		|Total length: {{duration}}
+`))
+
+const myPlayer = new MyAudioPlayer()
+
+myPlayer.$subscribe('files', ({state, value}) => {
+	if (value && value[0]) {
+		state.$data.src = URL.createObjectURL(value[0])
+	}
+})
+
+myPlayer.$mount({target: document.body})
+
+// Non passive event handier test
+const PassiveTest = create(parseEft(`
+>br
+>div
+	.Passive Test
+	>button
+		.Passive: Right click on me, menu should pop up
+		@contextmenu.passive.prevent = menuHandler
+	>button
+		.Non Passive: Right click on me, menu should not pop up
+		@contextmenu.prevent = menuHandler
+`))
+
+const passiveTest = new PassiveTest()
+
+passiveTest.$mount({target: document.body})
+
+// Once handler test
+const OnceTest = create(parseEft(`
+>br
+>div
+	.OnceTest
+	>button
+		.Click me, alert should always pop
+		@click = clickHandler
+	>button
+		.Click me, alert should pop only once
+		@click.once = clickHandler
+`))
+
+const onceTest = new OnceTest({
+	$methods: {
+		clickHandler() {
+			alert('clicked!')
+		}
+	}
+})
+
+onceTest.$mount({target: document.body})
