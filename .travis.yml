@@ -1,9 +1,0 @@
-script: npm run build
-language: node_js
-node_js:
-  - "14"
-cache:
-  directories:
-    - node_modules
-notifications:
-  webhooks: https://fathomless-fjord-24024.herokuapp.com/notify
