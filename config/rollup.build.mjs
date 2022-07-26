@@ -1,5 +1,5 @@
 // Import base config
-import base from './rollup.base'
+import base from './rollup.base.mjs'
 
 base.output.file = base.proDest
 base.output.sourcemap = process.env.BUILD_ENV === 'DEMO' || process.env.BUILD_ENV === 'CI' ? base.output.sourcemap : false
