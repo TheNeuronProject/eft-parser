@@ -228,7 +228,7 @@ const parseNodeAttrs = (string) => {
 	}
 }
 
-const parseLine = ({line, ast, parsingInfo, i}) => {
+const parseLine = ({line, ast, parsingInfo, i}, commentHandler) => {
 	if (isEmpty(line)) return
 	getOffset(line, parsingInfo)
 
@@ -238,13 +238,30 @@ const parseLine = ({line, ast, parsingInfo, i}) => {
 	let { depth, content } = getDepth(trimmedLine, parsingInfo, i)
 
 	if (content) {
-		if (depth < 0 || depth - parsingInfo.prevDepth > 1 || (depth - parsingInfo.prevDepth === 1 && ['comment', 'tag'].indexOf(parsingInfo.prevType) === -1) || (parsingInfo.prevType !== 'comment' && depth === 0 && parsingInfo.topExists)) throw new SyntaxError(getErrorMsg(`Expected indent to be grater than 0 and less than ${parsingInfo.prevDepth + 1}, but got ${depth}`, i))
 		const type = content[0]
+		const typeValid = typeSymbols.indexOf(type) >= 0
+
+		if (!typeValid) {
+			if (commentHandler) return commentHandler({
+				ast,
+				depth,
+				content,
+				parsingInfo
+			})
+
+			return
+		}
+
+		if (
+			depth < 0 ||
+			depth - parsingInfo.prevDepth > 1 ||
+			(depth - parsingInfo.prevDepth === 1 && parsingInfo.prevType !== 'tag')
+		) throw new SyntaxError(getErrorMsg(`Expected indent to be grater than 0 and less than ${parsingInfo.prevDepth + 1}, but got ${depth}`, i))
+
 		content = content.slice(1)
-		if (!content && typeSymbols.indexOf(type) >= 0) throw new SyntaxError(getErrorMsg('Empty content', i))
+		if (!content && typeValid) throw new SyntaxError(getErrorMsg('Empty content', i))
 		// Jump back to upper level
 		if (depth < parsingInfo.prevDepth || (depth === parsingInfo.prevDepth && parsingInfo.prevType === 'tag')) parsingInfo.currentNode = resolveDepth(ast, depth)
-		parsingInfo.prevDepth = depth
 
 		switch (type) {
 			case '>': {
@@ -325,13 +342,15 @@ const parseLine = ({line, ast, parsingInfo, i}) => {
 				break
 			}
 			default: {
-				parsingInfo.prevType = 'comment'
+				return
 			}
 		}
+
+		parsingInfo.prevDepth = depth
 	}
 }
 
-const parseEft = (template) => {
+const parseEft = (template, commentHandler) => {
 	if (!template) throw new TypeError(getErrorMsg('Template required, but nothing given'))
 	const tplType = typeof template
 	if (tplType !== 'string') throw new TypeError(getErrorMsg(`Expected a string, but got a(n) ${tplType}`))
@@ -343,10 +362,9 @@ const parseEft = (template) => {
 		offset: null,
 		offsetReg: null,
 		prevType: 'comment',
-		currentNode: ast,
-		topExists: false,
+		currentNode: ast
 	}
-	for (let i = 0; i < lines.length; i++) parseLine({line: lines[i], ast, parsingInfo, i})
+	for (let i = 0; i < lines.length; i++) parseLine({line: lines[i], ast, parsingInfo, i}, commentHandler)
 
 	if (ast.length <= 1) throw new SyntaxError(getErrorMsg('Nothing to be parsed', lines.length - 1))
 	if (ast.length === 2 && Array.isArray(ast[1]) && Object.hasOwnProperty.call(ast[1][0], 't')) return ast[1]
