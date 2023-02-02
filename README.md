@@ -24,24 +24,6 @@ Browser
 
 **Note:** ef.js has a builtin parser, but if you want a faster first render, parse the templates beforehand could be better.
 
-## Run a test
-```
-$ git clone https://github.com/ClassicOldSong/eft-parser.git
-$ cd eft-parser
-$ npm install
-$ npm start
-```
-Then you can test it out in the opening browser window.
-
-## Build from source
-```
-$ git clone https://github.com/ClassicOldSong/eft-parser.git
-$ cd eft-parser
-$ npm install
-$ npm run build
-```
-Then you can get the fresh-built `ef.min.js` at the `dist` folder.
-
 **Note:** All debugging messages are disabled in the production version
 
 ## License

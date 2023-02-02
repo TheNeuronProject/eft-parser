@@ -1,6 +1,6 @@
-import { efEscape, splitBy } from './escape-parser.js'
+import { efEscape, splitBy } from './escape-parser.mjs'
 
-const typeSymbols = '>#%@.-+'
+const typeSymbols = '>#%@.-+|'
 const reserved = [
 	'$ctx', '$refs', '$data', '$methods', '$mount', '$umount', '$subscribe', '$unsubscribe', '$update',
 	'$dispatch', '$emit', '$on', '$off', '$destroy', '__DIRECTMOUNT__'
